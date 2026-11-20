@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+config.yaml
+*.db
+*.log
+capture_*.html

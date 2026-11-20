@@ -1,0 +1,320 @@
+# FlipRadar – Watchlist
+#
+# query:      Suchbegriff auf den Plattformen
+# include:    ALLE Begriffe müssen im Titel stehen. "a|b" = a ODER b.
+# exclude:    keiner dieser Begriffe darf im Titel stehen (zusätzlich zu exclude_global)
+# min_price_chf: darunter ignorieren (Zubehör, Fakes, Defekte)
+# ref_price_chf: optional – eigener Marktwert, bis genug Vergleichsdaten da sind
+# tutti_category: optional – Tutti-Kategorie (cars, cellPhones, consolesGames, computerComponentsAccessories)
+# platforms:  optional – nur auf bestimmten Plattformen suchen
+# enabled: false  -> Eintrag pausieren
+#
+# Wörter werden als ganze Wörter verglichen: "ti" trifft nicht "titan".
+
+exclude_global:
+  - defekt
+  - kaputt
+  - bastler
+  - bastlerware
+  - ersatzteil
+  - ersatzteile
+  - suche
+  - gesucht
+  - tausche
+  - tausch
+  - ankauf
+  - kaufe
+  - leerkarton
+  - nur karton
+  - nur ovp
+  - ovp leer
+  - attrappe
+  - dummy
+  - replika
+  - icloud gesperrt
+  - icloud lock
+  - blacklist
+  - miete
+  - vermiete
+
+# Zusätzliche Ausschlüsse pro Kategorie (z. B. Komplett-PCs bei Grafikkarten)
+exclude_by_category:
+  gpu: [ohne chip, ohne gpu, ohne grafikchip, no gpu, chip entfernt, pcb only, pc, gaming pc, komplett pc, komplettsystem, rechner, computer, system, laptop, notebook]
+  cpu: [gaming pc, komplett pc, komplettsystem, rechner, computer, laptop, notebook]
+  ram: [gaming pc, komplett pc, rechner, computer, laptop, notebook, sodimm, so dimm]
+  ssd: [gaming pc, komplett pc, rechner, computer, laptop, notebook]
+  handy: [hülle, case, cover, panzerglas, schutzglas, displayschutz, schutzfolie]
+
+products:
+  # ---------------------------------------------------------- Grafikkarten
+  - name: RTX 3080
+    category: gpu
+    query: rtx 3080
+    include: ["3080"]
+    exclude: [ti, laptop, notebook, wasserkühler, waterblock, backplate]
+    min_price_chf: 200
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 3090
+    category: gpu
+    query: rtx 3090
+    include: ["3090"]
+    exclude: [ti, laptop, notebook, wasserkühler, waterblock, backplate]
+    min_price_chf: 350
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 4070
+    category: gpu
+    query: rtx 4070
+    include: ["4070"]
+    exclude: [ti, super, laptop, notebook]
+    min_price_chf: 250
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 4070 Super
+    category: gpu
+    query: rtx 4070 super
+    include: ["4070", "super"]
+    exclude: [ti, laptop, notebook]
+    min_price_chf: 300
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 4070 Ti Super
+    category: gpu
+    query: rtx 4070 ti super
+    include: ["4070", "ti|tis", "super|tis"]
+    exclude: [laptop, notebook]
+    min_price_chf: 400
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 4080
+    category: gpu
+    query: rtx 4080
+    include: ["4080"]
+    exclude: [super, laptop, notebook]
+    min_price_chf: 550
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 4080 Super
+    category: gpu
+    query: rtx 4080 super
+    include: ["4080", "super"]
+    exclude: [laptop, notebook]
+    min_price_chf: 600
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 4090
+    category: gpu
+    query: rtx 4090
+    include: ["4090"]
+    exclude: [laptop, notebook, wasserkühler, waterblock]
+    min_price_chf: 900
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 5070
+    category: gpu
+    query: rtx 5070
+    include: ["5070"]
+    exclude: [ti, laptop, notebook]
+    min_price_chf: 300
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 5070 Ti
+    category: gpu
+    query: rtx 5070 ti
+    include: ["5070", "ti"]
+    exclude: [laptop, notebook]
+    min_price_chf: 450
+    tutti_category: computerComponentsAccessories
+
+  - name: RTX 5080
+    category: gpu
+    query: rtx 5080
+    include: ["5080"]
+    exclude: [laptop, notebook]
+    min_price_chf: 650
+    tutti_category: computerComponentsAccessories
+
+  - name: RX 7900 XTX
+    category: gpu
+    query: rx 7900 xtx
+    include: ["7900 xtx|7900xtx"]
+    exclude: [laptop, notebook]
+    min_price_chf: 450
+    tutti_category: computerComponentsAccessories
+
+  # -------------------------------------------------------------- Konsolen
+  - name: PS5
+    category: konsole
+    query: ps5 konsole
+    include: ["ps5|playstation 5"]
+    exclude: [pro, controller, dualsense, spiel, spiele, game, games, headset, ladestation, portal, kamera, lenkrad, cover, faceplate, skin, ps4, vr2]
+    min_price_chf: 200
+    tutti_category: consolesGames
+
+  - name: PS5 Pro
+    category: konsole
+    query: ps5 pro
+    include: ["ps5 pro|playstation 5 pro"]
+    exclude: [controller, dualsense, spiel, spiele, game, games, headset, cover, skin, ladestation, portal, lenkrad, kamera, faceplate]
+    min_price_chf: 400
+    tutti_category: consolesGames
+
+  - name: Nintendo Switch 2
+    retail_url: https://www.galaxus.ch/de/s1/product/nintendo-switch-2-spielkonsole-76074259
+    category: konsole
+    query: nintendo switch 2
+    include: ["switch 2|switch2"]
+    exclude: [spiel, spiele, game, games, controller, pro controller, joy con, hülle, tasche, amiibo, oled, lite]
+    min_price_chf: 250
+    tutti_category: consolesGames
+
+  - name: Switch OLED
+    category: konsole
+    query: nintendo switch oled
+    include: ["switch", "oled"]
+    exclude: [spiel, spiele, game, games, controller, joy con, hülle, tasche, amiibo, dock]
+    min_price_chf: 150
+    tutti_category: consolesGames
+
+  - name: Steam Deck OLED
+    category: konsole
+    query: steam deck oled
+    include: ["steam deck|steamdeck", "oled"]
+    exclude: [hülle, tasche, dock, case]
+    min_price_chf: 300
+    tutti_category: consolesGames
+
+  - name: Xbox Series X
+    category: konsole
+    query: xbox series x
+    include: ["xbox", "series x"]
+    exclude: [controller, spiel, spiele, game, games, headset, festplatte, speicherkarte]
+    min_price_chf: 200
+    tutti_category: consolesGames
+
+  # ---------------------------------------------------------------- Handys
+  # Hinweis: Speichergrösse (128/256 GB) wird noch nicht unterschieden.
+  - name: iPhone 15 Pro
+    category: handy
+    query: iphone 15 pro
+    include: ["iphone", "15 pro"]
+    exclude: [max]
+    min_price_chf: 350
+    tutti_category: cellPhones
+
+  - name: iPhone 15 Pro Max
+    category: handy
+    query: iphone 15 pro max
+    include: ["iphone", "15 pro max"]
+    exclude: []
+    min_price_chf: 400
+    tutti_category: cellPhones
+
+  - name: iPhone 16 Pro
+    category: handy
+    query: iphone 16 pro
+    include: ["iphone", "16 pro"]
+    exclude: [max]
+    min_price_chf: 450
+    tutti_category: cellPhones
+
+  - name: iPhone 16 Pro Max
+    category: handy
+    query: iphone 16 pro max
+    include: ["iphone", "16 pro max"]
+    exclude: []
+    min_price_chf: 550
+    tutti_category: cellPhones
+
+  - name: iPhone 17 Pro
+    category: handy
+    query: iphone 17 pro
+    include: ["iphone", "17 pro"]
+    exclude: [max]
+    min_price_chf: 650
+    tutti_category: cellPhones
+
+  - name: Galaxy S24 Ultra
+    category: handy
+    query: samsung galaxy s24 ultra
+    include: ["s24 ultra|s24ultra"]
+    exclude: []
+    min_price_chf: 350
+    tutti_category: cellPhones
+
+  - name: Galaxy S25 Ultra
+    category: handy
+    query: samsung galaxy s25 ultra
+    include: ["s25 ultra|s25ultra"]
+    exclude: []
+    min_price_chf: 500
+    tutti_category: cellPhones
+
+  # ----------------------------------------------------- CPUs / RAM / SSDs
+  - name: Ryzen 7 7800X3D
+    category: cpu
+    query: ryzen 7 7800x3d
+    include: ["7800x3d|7800 x3d"]
+    exclude: [bundle]
+    min_price_chf: 150
+    tutti_category: computerComponentsAccessories
+
+  - name: Ryzen 7 9800X3D
+    category: cpu
+    query: ryzen 7 9800x3d
+    include: ["9800x3d|9800 x3d"]
+    exclude: []
+    min_price_chf: 250
+    tutti_category: computerComponentsAccessories
+
+  - name: Intel i7-14700K
+    category: cpu
+    query: i7 14700k
+    include: ["14700k|14700kf"]
+    exclude: []
+    min_price_chf: 150
+    tutti_category: computerComponentsAccessories
+
+  - name: DDR5 32GB Kit
+    category: ram
+    query: ddr5 32gb
+    include: ["ddr5", "32gb|32 gb|2x16gb|2x16 gb|2 x 16gb"]
+    exclude: []
+    min_price_chf: 50
+    tutti_category: computerComponentsAccessories
+
+  - name: Samsung 990 Pro 2TB
+    category: ssd
+    query: samsung 990 pro 2tb
+    include: ["990 pro", "2tb|2 tb"]
+    exclude: []
+    min_price_chf: 80
+    tutti_category: computerComponentsAccessories
+
+  # ----------------------------------------------------------------- Autos
+  # Grobe Schätzung: Jahrgang und Kilometer werden noch nicht berücksichtigt.
+  # Alarme hier also immer selbst genau prüfen. Bei Bedarf enabled: false setzen.
+  - name: VW Golf
+    category: auto
+    query: vw golf
+    include: ["golf"]
+    exclude: [felge, felgen, reifen, teile, motor, getriebe, spiegel, scheinwerfer, sitz, sitze, radio, stossstange, modell, modellauto, lego, bobby car, golfschläger, golfbag, golftasche, golf cart, golfball]
+    min_price_chf: 800
+    tutti_category: cars
+
+  - name: Toyota Yaris
+    category: auto
+    query: toyota yaris
+    include: ["yaris"]
+    exclude: [felge, felgen, reifen, teile, motor, getriebe, spiegel, scheinwerfer, sitz, radio, stossstange, modell, modellauto]
+    min_price_chf: 800
+    tutti_category: cars
+
+  - name: Skoda Octavia
+    category: auto
+    query: skoda octavia
+    include: ["octavia"]
+    exclude: [felge, felgen, reifen, teile, motor, getriebe, spiegel, scheinwerfer, sitz, radio, stossstange, modell, modellauto]
+    min_price_chf: 800
+    tutti_category: cars

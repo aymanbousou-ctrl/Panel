@@ -1,0 +1,47 @@
+# FlipRadar – Einstellungen
+# Kopiere diese Datei nach config.yaml und trage deinen Telegram-Bot ein.
+# config.yaml NIE teilen oder hochladen: der Token gibt Zugriff auf deinen Bot.
+
+telegram:
+  token: ""      # von @BotFather, z. B. 123456789:ABCdef...
+  chat_id: ""    # deine Chat-ID (siehe README, Schritt 3)
+
+# --- Deine Deal-Regeln -------------------------------------------------
+min_margin: 0.20          # Alarm ab 20 % Netto-Marge
+max_price_chf: 2000       # teurere Inserate werden ignoriert
+interval_minutes: 5       # Abstand zwischen den Durchläufen
+
+# --- Rechnung für den Netto-Gewinn ---------------------------------------
+# Netto = Marktwert × (1 − sell_fee_pct) − shipping_chf − Kaufpreis
+sell_fee_pct: 0.10        # Verkaufsgebühr der Plattform, auf der du weiterverkaufst (anpassen)
+shipping_chf: 10          # Versand oder Fahrtkosten pro Deal
+eur_to_chf: 0.94          # Wechselkurs für Kleinanzeigen – ab und zu aktualisieren
+
+# --- Marktwert -----------------------------------------------------------
+# Marktwert = Median der Angebotspreise auf Ricardo + Tutti (letzte 30 Tage),
+# mal asking_price_factor, weil Angebotspreise über den echten Verkaufspreisen liegen.
+value_platforms: [ricardo, tutti]
+asking_price_factor: 0.92
+min_samples: 8            # erst ab so vielen Vergleichsinseraten wird gerechnet
+lookback_days: 30
+warmup_first_cycle: true  # allererster Durchlauf sammelt nur Daten
+
+# --- Technik -------------------------------------------------------------
+platforms: [ricardo, tutti, kleinanzeigen, ebay]
+# Plattformen, die nur Preise sammeln und nie einen Telegram-Alarm senden
+# (muessen auch in platforms stehen), z. B. collect_only: [kleinanzeigen]
+collect_only: []
+max_results_per_search: 40
+request_delay_seconds: 3  # Pause zwischen Abfragen (nicht unter 2 setzen)
+db_path: flipradar.db
+log_path: flipradar.log
+
+# Optional: Mindestgewinn in CHF zusätzlich zur prozentualen Schwelle.
+min_profit_chf: 0
+# Eigene abgeschlossene Verkäufe (CSV relativ zu config.yaml).
+sales_csv: ""
+germany_extra_chf: 0     # Zusatzkosten für Käufe in Deutschland (CHF pro Kauf)
+
+ebay:
+  client_id: ""
+  client_secret: ""
