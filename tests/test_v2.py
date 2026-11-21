@@ -17,7 +17,7 @@ from flipradar.db import Store
 from flipradar.engine import Radar, delay_on_error
 from flipradar.models import Listing, Product
 from flipradar.pricing import evaluate
-from flipradar.sources import tutti, ricardo, kleinanzeigen, marktplaats, Ebay
+from flipradar.sources import tutti, ricardo, kleinanzeigen, marktplaats, vinted, Ebay
 from flipradar.setup import init
 from flipradar.retail import retail_price
 from flipradar.sales import load_sales
@@ -325,6 +325,36 @@ class Checks(unittest.TestCase):
         rows = dict(self.db.conn.execute("select listing_id, product from listings"))
         self.assertEqual(rows, {"m7": None, "m8": "RTX 4070"})
         self.t.send.assert_not_called()
+
+    def test_vinted_page(self):
+        def card(sku, label, price, total):
+            return (
+                '<div data-testid="grid-item"><div data-testid="product-item-id-%s">'
+                '<a data-testid="product-item-id-%s--overlay-link" href="/items/%s-x?referrer=catalog" title="%s"></a>'
+                '<div data-testid="product-item-id-%s--description-title">NVIDIA</div>'
+                '<div data-testid="product-item-id-%s--description-subtitle">Gut</div>'
+                '<div data-testid="product-item-id-%s--price-text">%s</div>'
+                '<div data-testid="product-item-id-%s--breakdown">%s inkl.</div></div></div>'
+                % (sku, sku, sku, label, sku, sku, sku, price, sku, total)
+            )
+
+        html = (
+            '<div class="x-feed-grid">'
+            + card("11", "RTX 4070, Marke: NVIDIA, Zustand: Gut, 599,99 \u20ac", "599,99 \u20ac", "1.630,69 \u20ac")
+            + card("11", "RTX 4070, Marke: NVIDIA", "599,99 \u20ac", "1.630,69 \u20ac")
+            + "</div>"
+        )
+        items = vinted(html.encode())
+        self.assertEqual(len(items), 1)
+        x = items[0]
+        self.assertEqual((x.listing_id, x.title, x.price, x.currency), ("11", "RTX 4070", 1630.69, "EUR"))
+        self.assertEqual(x.url, "https://www.vinted.de/items/11-x")
+        self.assertEqual(x.description, "Marke: NVIDIA, Zustand: Gut")
+        self.assertEqual(vinted(b'<div class="a-feed-grid"></div>'), [])
+        with self.assertRaises(ValueError):
+            vinted(b"<html>Forbidden</html>")
+        with self.assertRaises(ValueError):
+            vinted(b'<div data-testid="grid-item"><p>neu</p></div>')
 
 
 if __name__ == "__main__":

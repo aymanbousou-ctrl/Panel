@@ -200,6 +200,57 @@ def marktplaats(data):
     return list(result.values())
 
 
+def vinted(data):
+    """Liest die Inserate aus den Trefferkarten der Katalogseite (vinted.de).
+
+    Als Preis zaehlt, was die Kaeuferin zahlt: Artikelpreis inklusive Kaeuferschutz,
+    ohne Versand. Zustand und Marke stehen in der Beschreibung.
+    """
+    soup = page(data)
+    result = {}
+    for card in soup.select('[data-testid="grid-item"]'):
+        box = card.select_one('[data-testid^="product-item-id-"]')
+        link = card.select_one('a[data-testid$="--overlay-link"]')
+        if not box or not link:
+            raise ValueError("Vinted-Inseratformat unbekannt")
+        sku = box["data-testid"].split("product-item-id-", 1)[1]
+        path = urlsplit(link.get("href", "")).path
+        label = link.get("title", "")
+        base = card.select_one('[data-testid$="price-text"]')
+        total = card.select_one('[data-testid$="breakdown"]')
+        # Titel steht vor ", Marke: ..." bzw. ", Zustand: ..." im Link-Titel.
+        title = re.split(r", (?:Marke|Zustand): ", label, maxsplit=1)[0].strip()
+        price = parse_price(
+            (total or base).get_text(" ", strip=True) if (total or base) else None,
+            "EUR",
+        )[0]
+        if not (sku.isdecimal() and path.startswith("/items/") and title):
+            raise ValueError("Vinted-Inseratformat unbekannt")
+        brand = card.select_one('[data-testid$="description-title"]')
+        state = card.select_one('[data-testid$="description-subtitle"]')
+        details = [
+            part
+            for part in (
+                "Marke: " + brand.get_text(" ", strip=True) if brand else "",
+                "Zustand: " + state.get_text(" ", strip=True) if state else "",
+            )
+            if part
+        ]
+        if price:
+            result[sku] = Listing(
+                "vinted",
+                sku,
+                title,
+                urljoin("https://www.vinted.de", path),
+                price,
+                "EUR",
+                description=", ".join(details),
+            )
+    if not result and not soup.select('[class*="feed-grid"]'):
+        raise ValueError("Vinted-Ergebnisbereich fehlt")
+    return list(result.values())
+
+
 class Ebay:
     def __init__(self, settings):
         self.settings = settings
@@ -299,6 +350,9 @@ def search(name, p, settings, ebay):
         ):
             raise ValueError("Kleinanzeigen-URL ungueltig")
         parser = kleinanzeigen
+    elif name == "vinted":
+        url = "https://www.vinted.de/catalog?" + urlencode({"search_text": p.query})
+        parser = vinted
     elif name == "marktplaats":
         url = "https://www.marktplaats.nl/q/" + quote_plus(p.query) + "/"
         parser = marktplaats

@@ -22,6 +22,7 @@ PLATFORMS = {
     "tutti": Platform("Tutti", "CH", "CHF"),
     "kleinanzeigen": Platform("Kleinanzeigen", "DE", "EUR"),
     "ebay": Platform("eBay.de", "DE", "EUR"),
+    "vinted": Platform("Vinted.de", "DE", "EUR", collect_only=True),
     "marktplaats": Platform(
         "Marktplaats",
         "NL",
