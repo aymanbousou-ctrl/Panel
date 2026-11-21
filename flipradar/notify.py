@@ -11,16 +11,9 @@ from urllib.error import HTTPError
 from .net import read_json
 
 from .models import Deal
+from .platforms import label
 
 log = logging.getLogger("flipradar")
-
-PLATFORM_NAMES = {
-    "ebay": "eBay.de",
-    "ricardo": "Ricardo",
-    "tutti": "Tutti",
-    "kleinanzeigen": "Kleinanzeigen",
-}
-
 
 def money(value: float) -> str:
     """1250.4 -> 1'250 (Schweizer Tausender-Trennung)."""
@@ -44,7 +37,7 @@ def format_deal(deal: Deal) -> str:
     if deal.value_source == "verkauft":
         source = f"Median aus {deal.sample_size} abgeschlossenen Verkäufen"
     lines = [
-        f"🔥 <b>{e(deal.product.name)}</b> · {PLATFORM_NAMES.get(l.platform, l.platform)}",
+        f"🔥 <b>{e(deal.product.name)}</b> · {label(l.platform)}",
         e(l.title),
         "",
         f"💰 Preis: <b>{money(l.price_chf)} CHF</b>{orig}{vb}",

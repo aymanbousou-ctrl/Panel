@@ -6,6 +6,7 @@
 # min_price_chf: darunter ignorieren (Zubehör, Fakes, Defekte)
 # ref_price_chf: optional – eigener Marktwert, bis genug Vergleichsdaten da sind
 # tutti_category: optional – Tutti-Kategorie (cars, cellPhones, consolesGames, computerComponentsAccessories)
+# queries:    optional – eigener Suchbegriff je Plattform, z. B. {subito: ps5}
 # platforms:  optional – nur auf bestimmten Plattformen suchen
 # enabled: false  -> Eintrag pausieren
 #
@@ -40,9 +41,9 @@ exclude_global:
 # Zusätzliche Ausschlüsse pro Kategorie (z. B. Komplett-PCs bei Grafikkarten)
 exclude_by_category:
   gpu: [ohne chip, ohne gpu, ohne grafikchip, no gpu, chip entfernt, pcb only, pc, gaming pc, komplett pc, komplettsystem, rechner, computer, system, laptop, notebook]
-  cpu: [gaming pc, komplett pc, komplettsystem, rechner, computer, laptop, notebook]
-  ram: [gaming pc, komplett pc, rechner, computer, laptop, notebook, sodimm, so dimm]
-  ssd: [gaming pc, komplett pc, rechner, computer, laptop, notebook]
+  cpu: [game pc, desktop, tower, gaming pc, komplett pc, komplettsystem, rechner, computer, laptop, notebook]
+  ram: [game pc, desktop, tower, gaming pc, komplett pc, rechner, computer, laptop, notebook, sodimm, so dimm]
+  ssd: [game pc, desktop, tower, gaming pc, komplett pc, rechner, computer, laptop, notebook]
   handy: [hülle, case, cover, panzerglas, schutzglas, displayschutz, schutzfolie]
 
 products:
@@ -147,6 +148,7 @@ products:
   - name: PS5
     category: konsole
     query: ps5 konsole
+    queries: {subito: ps5, marktplaats: ps5, wallapop: ps5, leboncoin: ps5}   # "konsole" ist deutsch und findet dort nichts
     include: ["ps5|playstation 5"]
     exclude: [pro, controller, dualsense, spiel, spiele, game, games, headset, ladestation, portal, kamera, lenkrad, cover, faceplate, skin, ps4, vr2]
     min_price_chf: 200

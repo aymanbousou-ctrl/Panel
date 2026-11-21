@@ -59,3 +59,14 @@ Die Schweizer Preisbasis bilden gewöhnlich mindestens acht passende Einzelangeb
 Telegram-Schlüssel und eBay-Zugangsdaten bleiben in der lokalen Konfiguration. Für eine Fehlersuche reichen die relevanten Zeilen aus **flipradar.log**. Teile keine Konfigurationsdatei mit Zugangsdaten. Bei der Übernahme werden offene Meldungen neu bewertet. V1-Ricardo-Daten mit möglichen Gebotspreisen dienen erst nach erneuter Sichtung als Vergleich. Beim ersten Profilvergleich sammelt V2.1 zusätzliche Varianten- und Zustandsmerkmale.
 
 Die mitgelieferten Bibliotheken und Lizenzen stehen unter **vendor**. Die automatisierten Tests im Ordner **tests** laufen offline. Für Entwickler lautet der Befehl im entpackten Ordner `py -3.15 -m unittest discover -s tests`.
+
+## Weitere Quellen (nur sammeln)
+
+Zusätzlich zu Tutti, Ricardo und eBay gibt es **Marktplaats** (NL), **Vinted.de**, **Subito** (IT), **Wallapop** (ES) und **Leboncoin** (FR). Sie speichern Preise, senden aber nie einen Telegram-Alarm und fließen nicht in den Schweizer Marktwert ein. Zum Einschalten trägst du den Namen unter `platforms:` in der `config.yaml` im Datenordner ein, zum Beispiel `- marktplaats`.
+
+- **Marktplaats und Vinted** lesen die öffentliche Suchseite, ohne Kosten. Bei Marktplaats zählen Festpreise und „Bieden vanaf“ (als verhandelbar). Bei Vinted gilt der Preis inklusive Käuferschutz, ohne Versand.
+- **Subito, Wallapop und Leboncoin** laufen über den Dienst **Apify** (Dritter, kostenpflichtig, auf eigene Verantwortung). Den Token trägst du mit **EINSTELLUNGEN.cmd** ein. Im Block `apify:` der `config.yaml` stehen `products` (nur diese Produkte werden gesucht, Namen wie in der Watchlist), `interval_minutes` (Mindestabstand je Produkt, Standard 720) und `max_results` (Treffer pro Lauf, Standard 20). Preise laut Apify: Subito etwa 0,001 $, Wallapop etwa 0,00025 $ und Leboncoin etwa 0,0015 $ pro Treffer, dazu eine Startgebühr je Lauf. Ein Fehlschlag wird nicht vor Ablauf des Abstands wiederholt.
+- Die Suchbegriffe müssen zur Sprache passen. Mit `queries:` in der Watchlist legst du für eine Plattform einen eigenen Begriff fest, zum Beispiel `ps5` statt `ps5 konsole`.
+- Gesuche und Defekte filtert FlipRadar mit Begriffen der jeweiligen Sprache heraus.
+- **Kleinanzeigen** bleibt wie beschrieben ausgeschaltet, solange keine schriftliche Freigabe eingetragen ist.
+

@@ -50,6 +50,10 @@ def init(folder, home=None):
         cfg.setdefault("portfolio_chf", cfg.get("max_price_chf", 2000))
         cfg.setdefault("lot_budget_chf", cfg.get("max_price_chf", 2000))
         cfg.setdefault("ebay", {"client_id": "", "client_secret": ""})
+        cfg.setdefault(
+            "apify",
+            {"token": "", "products": [], "interval_minutes": 720, "max_results": 20},
+        )
         platforms = cfg.setdefault("platforms", ["ricardo", "tutti", "kleinanzeigen"])
         if "ebay" not in platforms:
             platforms.append("ebay")
@@ -140,6 +144,7 @@ def edit(folder):
         ("Telegram Chat-ID", "telegram", "chat_id", False),
         ("eBay Produktions-App-ID", "ebay", "client_id", False),
         ("eBay Produktions-Cert-ID", "ebay", "client_secret", True),
+        ("Apify API-Token (optional)", "apify", "token", True),
     ]
     entries = []
     for idx, (label, section, key, secret) in enumerate(fields):

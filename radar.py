@@ -15,6 +15,7 @@ from flipradar.config import load_settings, load_watchlist
 from flipradar.db import Store
 from flipradar.engine import Radar
 from flipradar.notify import Telegram
+from flipradar.platforms import PLATFORMS
 from flipradar.setup import data_dir, edit, init
 from flipradar.sources import Ebay, search
 
@@ -112,6 +113,15 @@ def main():
                 if name == "ebay" and not (s.ebay_client_id and s.ebay_client_secret):
                     log.warning("eBay.de: Zugangsdaten fehlen")
                     continue
+                if PLATFORMS[name].paid:
+                    if not s.apify_token:
+                        log.warning("%s: Apify-Token fehlt", name)
+                        continue
+                    log.info(
+                        "%s: kostenpflichtiger Testlauf, bis zu %d Treffer",
+                        name,
+                        s.apify_max_results,
+                    )
                 product = next(
                     (p for p in products if not p.platforms or name in p.platforms),
                     None,

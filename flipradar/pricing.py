@@ -7,6 +7,7 @@ from statistics import median
 
 from .config import Settings
 from .models import Deal, Listing, Product
+from .platforms import country
 
 _NUM = re.compile(r"\d[\d'’ .,]*")
 
@@ -114,11 +115,7 @@ def evaluate(
         return None
     if retail_chf is not None:
         value = min(value, retail_chf)
-    extra = (
-        settings.germany_extra_chf
-        if listing.platform in {"kleinanzeigen", "ebay"}
-        else 0
-    )
+    extra = settings.germany_extra_chf if country(listing.platform) == "DE" else 0
     available = settings.portfolio_chf if available is None else available
     reserve = settings.b_reserve_chf * units if grade == "B-Ware" else 0
     if price + extra + reserve > available:

@@ -12,7 +12,8 @@ from .handel import choose, inventory, profile, write_trends
 from email.utils import parsedate_to_datetime
 from urllib.error import HTTPError
 from .sources import Ebay, search
-from .matcher import match_product
+from .matcher import has_any, match_product
+from .platforms import PLATFORMS, excluded_terms
 from .notify import format_deal
 from .sales import load_sales
 from .retail import refresh_prices
@@ -44,6 +45,14 @@ class Radar:
         self.ebay = Ebay(settings)
         init_discovery(store)
         self.platforms = list(dict.fromkeys(settings.platforms))
+        self.collect_only = set(settings.collect_only)
+        for name in list(self.platforms):
+            if PLATFORMS[name].paid and not settings.apify_token:
+                self.platforms.remove(name)
+                log.warning(
+                    "%s inaktiv: Apify-Token fehlt. Beim Start E fuer Einstellungen waehlen.",
+                    PLATFORMS[name].label,
+                )
         if "ebay" in self.platforms and not (
             settings.ebay_client_id and settings.ebay_client_secret
         ):
@@ -52,6 +61,7 @@ class Radar:
                 "eBay.de inaktiv: Produktionsschluessel fehlen. Beim Start E fuer Einstellungen waehlen."
             )
         self.store.conn.executescript("""
+            CREATE TABLE IF NOT EXISTS paid_runs(platform TEXT, product TEXT, last REAL, PRIMARY KEY(platform, product));
             CREATE TABLE IF NOT EXISTS pauses(platform TEXT PRIMARY KEY, until REAL, reason TEXT);
             CREATE TABLE IF NOT EXISTS opportunities(key TEXT PRIMARY KEY,product TEXT,first_day TEXT);
             CREATE TABLE IF NOT EXISTS rotation(id INTEGER PRIMARY KEY, cursor INTEGER);
@@ -64,6 +74,9 @@ class Radar:
             expanded(db, products, s.disabled_models) if s.discovery else products
         )
         today = date.today().isoformat()
+        unknown = set(s.apify_products) - {p.name for p in products}
+        if unknown:
+            log.warning("apify.products nennt unbekannte Produkte: %s", sorted(unknown))
         folder = Path(s.db_path).resolve().parent
         samples, invested = inventory(folder / "Bestand.csv")
         sold = load_sales(s.sales_csv, s.lookback_days, samples)
@@ -102,6 +115,7 @@ class Radar:
                 for name in self.platforms
                 if name not in paused
                 and (not product.platforms or name in product.platforms)
+                and self._due(name, product)
             ]
             if "ebay" in active:
                 with db.conn:
@@ -162,6 +176,8 @@ class Radar:
                 for item in listings:
                     item.price_chf = to_chf(item, s)
                     matched = match_product(item, products)
+                    if matched and has_any(item.title, excluded_terms(name)):
+                        matched = None
                     details = profile(item, matched) if matched else None
                     if (
                         not details
@@ -182,7 +198,9 @@ class Radar:
                     status = db.upsert(
                         item,
                         matched.name if matched else None,
-                        track=not warm and alerts_enabled,
+                        track=not warm
+                        and alerts_enabled
+                        and name not in self.collect_only,
                     )
                     if status == "neu":
                         count["neu"] += 1
@@ -190,6 +208,7 @@ class Radar:
                         matched
                         and not warm
                         and alerts_enabled
+                        and name not in self.collect_only
                         and db.eligible(item.key)
                     ):
                         candidates[item.key] = (item, matched, *details)
@@ -275,7 +294,11 @@ class Radar:
                 c["Inserate"],
                 c["neu"],
                 c["Deals"],
-                " (pausiert)" if n in paused else "",
+                " (pausiert)"
+                if n in paused
+                else " (nur sammeln)"
+                if n in self.collect_only
+                else "",
             )
             if c["ausgefiltert"] or c["Variante unklar"] or c["Bewertung/Kaufregeln"]:
                 log.info(
@@ -288,6 +311,30 @@ class Radar:
         pending = db.conn.execute("SELECT COUNT(*) FROM pending").fetchone()[0]
         log.info("Durchlauf fertig. Telegram ausstehend: %d", pending)
         return stats
+
+    def _due(self, name, product):
+        """Bezahlte Quellen laufen nur fuer gewaehlte Produkte und mit Mindestabstand.
+
+        Der Versuch wird sofort vermerkt, damit auch ein Fehlschlag nicht jeden
+        Durchlauf erneut Geld kostet.
+        """
+        if not PLATFORMS[name].paid:
+            return True
+        if product.name not in self.s.apify_products:
+            return False
+        now = time.time()
+        row = self.store.conn.execute(
+            "SELECT last FROM paid_runs WHERE platform=? AND product=?",
+            (name, product.name),
+        ).fetchone()
+        if row and now - row[0] < self.s.apify_interval_minutes * 60:
+            return False
+        with self.store.conn:
+            self.store.conn.execute(
+                "INSERT OR REPLACE INTO paid_runs VALUES(?,?,?)",
+                (name, product.name, now),
+            )
+        return True
 
     @staticmethod
     def _paused(name, end, reason):

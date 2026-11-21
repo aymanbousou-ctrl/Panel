@@ -53,3 +53,16 @@ discovery: true
 disabled_models: []
 ebay_daily_calls: 4000
 kleinanzeigen_schriftliche_freigabe: false
+
+# Weitere Quellen, die nur sammeln und nie Alarm senden: marktplaats, vinted, subito, wallapop, leboncoin
+# (Namen unter platforms eintragen). collect_only kann zusaetzlich weitere Plattformen auf "nur sammeln" setzen.
+collect_only: []
+
+# Optional, kostenpflichtig: subito, wallapop und leboncoin laufen ueber Apify (Dienst von Dritten).
+# Jeder Lauf verbraucht Apify-Guthaben. Gesucht wird nur nach den hier genannten Produkten.
+apify:
+  token: ""
+  products: []           # Namen aus der watchlist.yaml, z. B. ["PS5", "RTX 4070"]
+  interval_minutes: 720  # Mindestabstand je Produkt (12 Stunden)
+  max_results: 20        # Treffer pro Lauf
+

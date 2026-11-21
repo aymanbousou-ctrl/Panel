@@ -46,3 +46,9 @@ def match_product(listing: Listing, products: list[Product]) -> Product | None:
     if not hits:
         return None
     return max(hits, key=lambda p: (len(p.include), sum(len(g) for g in p.include)))
+
+
+def has_any(text: str, words) -> bool:
+    """Ganzes-Wort-Treffer fuer eine Liste von Begriffen."""
+    norm = normalize(text)
+    return any(_contains(norm, w) for w in words)
