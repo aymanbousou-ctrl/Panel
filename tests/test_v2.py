@@ -443,6 +443,26 @@ class Checks(unittest.TestCase):
         with self.assertRaises(ValueError):
             load_settings(cfg)
 
+    def test_subito_input_and_platform_queries(self):
+        p = Product("PS5", "konsole", "ps5 konsole", ["ps5"], [], queries={"subito": "ps5"})
+        self.assertEqual((p.query_for("subito"), p.query_for("tutti")), ("ps5", "ps5 konsole"))
+        self.s.apify_token, self.s.max_price_chf, self.s.eur_to_chf = "t", 2000, 0.94
+        with patch("flipradar.sources.run_actor", return_value=[]) as call:
+            from flipradar.sources import subito
+
+            subito(p, self.s)
+        payload = call.call_args.args[1]
+        self.assertEqual(payload["searchKeywords"], ["ps5"])
+        self.assertEqual((payload["sortOrder"], payload["maxPrice"]), ("datedesc", 2128))
+        self.assertEqual(payload["maxItemsPerQuery"], self.s.apify_max_results)
+        wl = self.path / "w.yaml"
+        wl.write_text("products:\n  - name: PS5\n    query: ps5 konsole\n    queries: {Subito: ps5}\n")
+        self.assertEqual(load_watchlist(wl)[0].queries, {"subito": "ps5"})
+        self.assertEqual(
+            [x for x in load_watchlist(ROOT / "watchlist.yaml") if x.name == "PS5"][0].query_for("marktplaats"),
+            "ps5",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

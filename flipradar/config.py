@@ -177,6 +177,11 @@ def load_watchlist(path: str | Path) -> list[Product]:
                 retail_url=item.get("retail_url"),
                 tutti_category=item.get("tutti_category"),
                 platforms=[p.lower() for p in _as_list(item.get("platforms"))] or None,
+                queries={
+                    str(k).lower(): str(v)
+                    for k, v in (item.get("queries") or {}).items()
+                }
+                or None,
             )
         )
     names = [p.name for p in products]

@@ -306,10 +306,12 @@ def subito(p, settings):
                 "maxItemsPerQuery": settings.apify_max_results,
                 "proxyConfiguration": {"useApifyProxy": True},
                 "shippableOnly": False,
-                "startUrls": [
-                    "https://www.subito.it/annunci-italia/vendita/usato/?"
-                    + urlencode({"q": p.query})
-                ],
+                "searchKeywords": [p.query_for("subito")],
+                "sortOrder": "datedesc",
+                "maxPrice": math.ceil(
+                    min(settings.max_price_chf, p.max_price_chf or settings.max_price_chf)
+                    / settings.eur_to_chf
+                ),
             },
             settings.apify_token,
         )
@@ -347,7 +349,7 @@ class Ebay:
             self.authorize()
         params = urlencode(
             {
-                "q": product.query,
+                "q": product.query_for("ebay"),
                 "sort": "newlyListed",
                 "limit": min(200, self.settings.max_results_per_search),
                 "filter": "buyingOptions:{FIXED_PRICE},itemLocationCountry:DE",
@@ -396,13 +398,13 @@ def search(name, p, settings, ebay):
     if name == "subito":
         return subito(p, settings)[: settings.max_results_per_search]
     if name == "tutti":
-        url = "https://www.tutti.ch/de/q?" + urlencode({"query": p.query})
+        url = "https://www.tutti.ch/de/q?" + urlencode({"query": p.query_for("tutti")})
         parser = tutti
     elif name == "ricardo":
-        url = "https://www.ricardo.ch/de/s/" + quote(p.query, safe="") + "/"
+        url = "https://www.ricardo.ch/de/s/" + quote(p.query_for("ricardo"), safe="") + "/"
         parser = ricardo
     elif name == "kleinanzeigen":
-        slug = re.sub(r"[^a-z0-9äöüß]+", "-", p.query.lower()).strip("-")
+        slug = re.sub(r"[^a-z0-9äöüß]+", "-", p.query_for("kleinanzeigen").lower()).strip("-")
         cap = math.ceil(
             min(settings.max_price_chf, p.max_price_chf or settings.max_price_chf)
             / settings.eur_to_chf
@@ -418,10 +420,10 @@ def search(name, p, settings, ebay):
             raise ValueError("Kleinanzeigen-URL ungueltig")
         parser = kleinanzeigen
     elif name == "vinted":
-        url = "https://www.vinted.de/catalog?" + urlencode({"search_text": p.query})
+        url = "https://www.vinted.de/catalog?" + urlencode({"search_text": p.query_for("vinted")})
         parser = vinted
     elif name == "marktplaats":
-        url = "https://www.marktplaats.nl/q/" + quote_plus(p.query) + "/"
+        url = "https://www.marktplaats.nl/q/" + quote_plus(p.query_for("marktplaats")) + "/"
         parser = marktplaats
     else:
         raise ValueError("Unbekannte Plattform")
