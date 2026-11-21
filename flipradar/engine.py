@@ -9,7 +9,7 @@ from email.utils import parsedate_to_datetime
 from urllib.error import HTTPError
 from .sources import Ebay, search
 from .matcher import has_any, match_product
-from .platforms import excluded_terms
+from .platforms import PLATFORMS, excluded_terms
 from .notify import format_deal
 from .sales import load_sales
 from .retail import refresh_prices
@@ -48,7 +48,15 @@ class Radar:
             log.warning(
                 "eBay.de inaktiv: Produktionsschluessel fehlen. Beim Start E fuer Einstellungen waehlen."
             )
+        for name in list(self.platforms):
+            if PLATFORMS[name].paid and not settings.apify_token:
+                self.platforms.remove(name)
+                log.warning(
+                    "%s inaktiv: Apify-Token fehlt. Beim Start E fuer Einstellungen waehlen.",
+                    PLATFORMS[name].label,
+                )
         self.store.conn.executescript("""
+            CREATE TABLE IF NOT EXISTS paid_runs(platform TEXT, product TEXT, last REAL, PRIMARY KEY(platform, product));
             CREATE TABLE IF NOT EXISTS pauses(platform TEXT PRIMARY KEY, until REAL, reason TEXT);
             CREATE TABLE IF NOT EXISTS state(name TEXT PRIMARY KEY);
         """)
@@ -64,6 +72,9 @@ class Radar:
             log.info(
                 "Erstlauf: Vergleichspreise sammeln. Danach sind Deal-Alarme aktiv."
             )
+        unknown = set(s.apify_products) - {p.name for p in products}
+        if unknown:
+            log.warning("apify.products nennt unbekannte Produkte: %s", sorted(unknown))
         prices = refresh_prices(products, db)
         sold = load_sales(s.sales_csv, s.lookback_days)
         paused = {
@@ -81,6 +92,7 @@ class Radar:
                 for name in self.platforms
                 if name not in paused
                 and (not product.platforms or name in product.platforms)
+                and self._due(name, product)
             ]
             if not active:
                 continue
@@ -191,6 +203,30 @@ class Radar:
         pending = db.conn.execute("SELECT COUNT(*) FROM pending").fetchone()[0]
         log.info("Durchlauf fertig. Telegram ausstehend: %d", pending)
         return stats
+
+    def _due(self, name, product):
+        """Bezahlte Quellen laufen nur fuer gewaehlte Produkte und mit Mindestabstand.
+
+        Der Versuch wird sofort vermerkt, damit auch ein Fehlschlag nicht jeden
+        Durchlauf erneut Geld kostet.
+        """
+        if not PLATFORMS[name].paid:
+            return True
+        if product.name not in self.s.apify_products:
+            return False
+        now = time.time()
+        row = self.store.conn.execute(
+            "SELECT last FROM paid_runs WHERE platform=? AND product=?",
+            (name, product.name),
+        ).fetchone()
+        if row and now - row[0] < self.s.apify_interval_minutes * 60:
+            return False
+        with self.store.conn:
+            self.store.conn.execute(
+                "INSERT OR REPLACE INTO paid_runs VALUES(?,?,?)",
+                (name, product.name, now),
+            )
+        return True
 
     @staticmethod
     def _paused(name, end, reason):

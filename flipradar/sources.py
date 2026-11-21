@@ -10,6 +10,7 @@ from urllib.parse import quote, quote_plus, urlencode, urljoin, urlsplit
 
 from bs4 import BeautifulSoup
 from .models import Listing
+from .apify import run_actor
 from .net import read, read_json
 from .pricing import parse_price
 
@@ -251,6 +252,70 @@ def vinted(data):
     return list(result.values())
 
 
+SUBITO_ACTOR = "epicscrapers/subito-scraper"
+
+
+def subito_listings(rows):
+    """Wandelt die Ergebnisse des Apify-Scrapers in Inserate um."""
+    if not isinstance(rows, list):
+        raise ValueError("Subito-Antwort ist keine Liste")
+    result = {}
+    for row in rows:
+        if not isinstance(row, dict) or not {"page_url", "title"} <= row.keys():
+            raise ValueError("Subito-Inseratformat unbekannt")
+        parts = urlsplit(str(row["page_url"]))
+        sku = re.search(r"-(\d+)\.htm$", parts.path)
+        price = row.get("price")
+        price = price.get("value") if isinstance(price, dict) else None
+        if (
+            parts.scheme != "https"
+            or parts.hostname != "www.subito.it"
+            or not sku
+            or not row["title"]
+            or row.get("type", "In vendita") != "In vendita"
+            or isinstance(price, bool)
+            or not isinstance(price, (int, float))
+            or not math.isfinite(price)
+            or price <= 0
+        ):
+            continue
+        place = row.get("geo") or {}
+        city = place.get("city") or ""
+        code = place.get("province_code")
+        result[sku[1]] = Listing(
+            "subito",
+            sku[1],
+            row["title"],
+            f"https://www.subito.it{parts.path}",
+            float(price),
+            "EUR",
+            location=f"{city} ({code})" if city and code else city,
+            description=row.get("description") or "",
+        )
+    return list(result.values())
+
+
+def subito(p, settings):
+    return subito_listings(
+        run_actor(
+            SUBITO_ACTOR,
+            {
+                "enrichPhone": False,
+                "enrichShop": False,
+                "enrichUserAccount": False,
+                "maxItemsPerQuery": settings.apify_max_results,
+                "proxyConfiguration": {"useApifyProxy": True},
+                "shippableOnly": False,
+                "startUrls": [
+                    "https://www.subito.it/annunci-italia/vendita/usato/?"
+                    + urlencode({"q": p.query})
+                ],
+            },
+            settings.apify_token,
+        )
+    )
+
+
 class Ebay:
     def __init__(self, settings):
         self.settings = settings
@@ -328,6 +393,8 @@ class Ebay:
 def search(name, p, settings, ebay):
     if name == "ebay":
         return ebay.search(p)
+    if name == "subito":
+        return subito(p, settings)[: settings.max_results_per_search]
     if name == "tutti":
         url = "https://www.tutti.ch/de/q?" + urlencode({"query": p.query})
         parser = tutti

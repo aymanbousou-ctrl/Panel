@@ -40,6 +40,10 @@ class Settings:
     germany_extra_chf: float = 0
     sales_csv: str = ""
     min_profit_chf: float = 0.0
+    apify_token: str = ""
+    apify_products: list[str] = field(default_factory=list)  # Namen aus der Watchlist
+    apify_interval_minutes: float = 720.0  # Mindestabstand je Produkt und Quelle
+    apify_max_results: int = 20  # Treffer pro bezahltem Lauf
     ebay_client_id: str = ""
     ebay_client_secret: str = ""
     db_path: str = "flipradar.db"
@@ -63,6 +67,15 @@ def load_settings(path: str | Path) -> Settings:
     s.ebay_client_secret = os.environ.get("FLIPRADAR_EBAY_SECRET") or str(
         ebay.get("client_secret") or ""
     )
+    apify = data.get("apify") or {}
+    s.apify_token = os.environ.get("FLIPRADAR_APIFY_TOKEN") or str(
+        apify.get("token") or ""
+    )
+    s.apify_products = _as_list(apify.get("products"))
+    if apify.get("interval_minutes") is not None:
+        s.apify_interval_minutes = float(apify["interval_minutes"])
+    if apify.get("max_results") is not None:
+        s.apify_max_results = int(apify["max_results"])
     for key in (
         "interval_minutes",
         "min_margin",
@@ -115,6 +128,10 @@ def load_settings(path: str | Path) -> Settings:
         and s.request_delay_seconds >= 0
     ):
         raise ValueError("Unplausible Such- oder Bewertungsparameter in config.yaml")
+    if not (10 <= s.apify_interval_minutes <= 10080 and 1 <= s.apify_max_results <= 100):
+        raise ValueError(
+            "apify: interval_minutes 10 bis 10080 und max_results 1 bis 100 angeben"
+        )
     if s.sales_csv:
         s.sales_csv = str(Path(path).parent / s.sales_csv)
     return s

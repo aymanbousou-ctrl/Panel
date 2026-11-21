@@ -15,6 +15,8 @@ class Platform:
     collect_only: bool = False
     # Begriffe fuer Gesuche, Defekte und Tausch in der Landessprache der Plattform.
     exclude: tuple = ()
+    # Kostet pro Lauf Geld (Dienst von Dritten): nur gewaehlte Produkte, mit Mindestabstand.
+    paid: bool = False
 
 
 PLATFORMS = {
@@ -22,6 +24,18 @@ PLATFORMS = {
     "tutti": Platform("Tutti", "CH", "CHF"),
     "kleinanzeigen": Platform("Kleinanzeigen", "DE", "EUR"),
     "ebay": Platform("eBay.de", "DE", "EUR"),
+    "subito": Platform(
+        "Subito.it",
+        "IT",
+        "EUR",
+        collect_only=True,
+        paid=True,
+        exclude=(
+            "cercasi", "cerco", "difettoso", "guasto", "rotto", "non funzionante",
+            "ricambi", "per ricambi", "scambio", "permuta", "scatola vuota",
+            "affitto", "noleggio",
+        ),
+    ),
     "vinted": Platform("Vinted.de", "DE", "EUR", collect_only=True),
     "marktplaats": Platform(
         "Marktplaats",

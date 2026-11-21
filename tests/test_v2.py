@@ -17,8 +17,9 @@ from flipradar.db import Store
 from flipradar.engine import Radar, delay_on_error
 from flipradar.models import Listing, Product
 from flipradar.pricing import evaluate
-from flipradar.sources import tutti, ricardo, kleinanzeigen, marktplaats, vinted, Ebay
+from flipradar.sources import tutti, ricardo, kleinanzeigen, marktplaats, vinted, subito_listings, Ebay
 from flipradar.setup import init
+from flipradar.apify import run_actor
 from flipradar.retail import retail_price
 from flipradar.sales import load_sales
 from datetime import date
@@ -355,6 +356,92 @@ class Checks(unittest.TestCase):
             vinted(b"<html>Forbidden</html>")
         with self.assertRaises(ValueError):
             vinted(b'<div data-testid="grid-item"><p>neu</p></div>')
+
+    def test_subito_rows_and_apify_call(self):
+        def row(**extra):
+            return {
+                "type": "In vendita",
+                "title": "iPhone 15 Pro",
+                "description": "Come nuovo",
+                "page_url": "https://www.subito.it/telefonia/iphone-15-pro-salerno-669178404.htm",
+                "price": {"value": 500, "formatted": "500 \u20ac"},
+                "geo": {"city": "Salerno", "province_code": "SA"},
+                **extra,
+            }
+
+        rows = [
+            row(),
+            row(),
+            row(type="Cercasi", page_url="https://www.subito.it/x/a-1.htm"),
+            row(price=None, page_url="https://www.subito.it/x/b-2.htm"),
+            row(page_url="https://boese.example/x/c-3.htm"),
+            row(page_url="https://www.subito.it/x/ohne-nummer"),
+        ]
+        items = subito_listings(rows)
+        self.assertEqual(len(items), 1)
+        x = items[0]
+        self.assertEqual((x.listing_id, x.price, x.currency, x.location), ("669178404", 500.0, "EUR", "Salerno (SA)"))
+        self.assertEqual(x.url, "https://www.subito.it/telefonia/iphone-15-pro-salerno-669178404.htm")
+        self.assertEqual(subito_listings([]), [])
+        with self.assertRaises(ValueError):
+            subito_listings({"error": "x"})
+        with self.assertRaises(ValueError):
+            subito_listings([{"foo": 1}])
+        with patch("flipradar.apify.read_json", return_value=[]) as call:
+            run_actor("epicscrapers/subito-scraper", {"a": 1}, "geheim")
+        url = call.call_args.args[0]
+        self.assertIn("/acts/epicscrapers~subito-scraper/run-sync-get-dataset-items", url)
+        self.assertNotIn("geheim", url)
+        self.assertEqual(call.call_args.kwargs["headers"]["Authorization"], "Bearer geheim")
+        with patch("flipradar.apify.read_json", return_value={"error": 1}):
+            with self.assertRaises(ValueError):
+                run_actor("a/b", {}, "t")
+        with self.assertRaises(ValueError):
+            run_actor("../../x", {}, "t")
+
+    def test_paid_source_runs_only_for_chosen_products_with_interval(self):
+        self.s.platforms = ["subito"]
+        self.s.apify_token = "t"
+        self.s.apify_products = ["RTX 4070"]
+        other = Product("PS5", "konsole", "ps5", ["ps5"], [])
+        radar = Radar(self.s, self.db, self.t)
+        with patch("flipradar.engine.search", return_value=[]) as fetch:
+            radar.cycle([self.p, other])
+            radar.cycle([self.p, other])
+        self.assertEqual(fetch.call_count, 1)
+        self.assertEqual(fetch.call_args.args[1].name, "RTX 4070")
+        self.s.apify_interval_minutes = 10
+        with self.db.conn:
+            self.db.conn.execute("update paid_runs set last = last - 700")
+        with patch("flipradar.engine.search", return_value=[]) as fetch:
+            radar.cycle([self.p, other])
+        self.assertEqual(fetch.call_count, 1)
+
+    def test_paid_failure_is_not_retried_within_interval(self):
+        self.s.platforms = ["subito"]
+        self.s.apify_token = "t"
+        self.s.apify_products = ["RTX 4070"]
+        radar = Radar(self.s, self.db, self.t)
+        with patch("flipradar.engine.search", side_effect=ValueError("kaputt")) as fetch:
+            radar.cycle([self.p])
+            radar.cycle([self.p])
+        self.assertEqual(fetch.call_count, 1)
+
+    def test_paid_source_needs_token_and_config(self):
+        self.s.platforms = ["subito"]
+        self.assertEqual(Radar(self.s, self.db, self.t).platforms, [])
+        cfg = self.path / "config.yaml"
+        cfg.write_text(
+            "platforms: [subito]\napify: {token: abc, products: [PS5], interval_minutes: 60, max_results: 5}\n"
+        )
+        s = load_settings(cfg)
+        self.assertEqual(
+            (s.apify_token, s.apify_products, s.apify_interval_minutes, s.apify_max_results, s.collect_only),
+            ("abc", ["PS5"], 60, 5, ["subito"]),
+        )
+        cfg.write_text("platforms: [subito]\napify: {interval_minutes: 1}\n")
+        with self.assertRaises(ValueError):
+            load_settings(cfg)
 
 
 if __name__ == "__main__":

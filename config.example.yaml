@@ -46,3 +46,11 @@ germany_extra_chf: 0     # Zusatzkosten für Käufe in Deutschland (CHF pro Kauf
 ebay:
   client_id: ""
   client_secret: ""
+
+# Optional, kostenpflichtig: Quellen ueber Apify (Dienst von Dritten), z. B. platforms: [..., subito]
+# Jeder Lauf verbraucht Apify-Guthaben. Gesucht wird nur nach den hier genannten Produkten.
+apify:
+  token: ""
+  products: []           # Namen aus der watchlist.yaml, z. B. ["PS5", "RTX 4070"]
+  interval_minutes: 720  # Mindestabstand je Produkt (12 Stunden)
+  max_results: 20        # Treffer pro Lauf
