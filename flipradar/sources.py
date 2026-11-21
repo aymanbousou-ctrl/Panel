@@ -1,6 +1,7 @@
 """Publicly displayed listings and the official eBay Browse API."""
 
 import base64
+from http.client import HTTPException
 import json
 import math
 import re
@@ -469,6 +470,43 @@ class Ebay:
         )
         self.token = response["access_token"]
         self.expires = time.monotonic() + max(0, int(response["expires_in"]) - 60)
+
+    def check(self):
+        """Test fuer Einstellungen und Diagnose. Ergebnis: (ok, Meldung auf Deutsch)."""
+        if not (self.settings.ebay_client_id and self.settings.ebay_client_secret):
+            return False, "App-ID oder Cert-ID fehlt."
+        try:
+            self.authorize()
+            read_json(
+                "https://api.ebay.com/buy/browse/v1/item_summary/search?"
+                + urlencode({"q": "test", "limit": 1}),
+                headers={
+                    "Authorization": "Bearer " + self.token,
+                    "X-EBAY-C-MARKETPLACE-ID": "EBAY_DE",
+                },
+            )
+        except HTTPError as exc:
+            try:
+                body = json.dumps(json.loads(exc.read(16384))).lower()
+            except (ValueError, OSError, AttributeError):
+                body = ""
+            exc.close()
+            if exc.code in (400, 401) and "invalid_client" in body:
+                return False, (
+                    "eBay lehnt die Schlüssel ab. Es müssen Produktions-Schlüssel sein "
+                    "(App-ID und Cert-ID), keine Sandbox-Schlüssel."
+                )
+            if exc.code == 403:
+                return False, (
+                    "Die Schlüssel sind gültig, aber für die Browse API fehlt die "
+                    "Produktionsfreigabe."
+                )
+            if exc.code == 429:
+                return False, "Das eBay-Tageskontingent dieser Schlüssel ist ausgeschöpft."
+            return False, f"eBay meldet einen Fehler (HTTP {exc.code})."
+        except (OSError, ValueError, KeyError, HTTPException):
+            return False, "Keine Verbindung zu eBay oder unerwartete Antwort."
+        return True, "eBay-Zugang funktioniert."
 
     def search(self, product):
         if time.monotonic() >= self.expires:

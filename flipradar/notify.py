@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import html
 import logging
+import re
 import time
 
 import json
+from http.client import HTTPException
 from urllib.error import HTTPError
 from .net import read_json
 
@@ -64,53 +66,120 @@ def format_deal(deal: Deal) -> str:
     return "\n".join(lines)
 
 
+TOKEN_FORMAT = re.compile(r"\d{6,}:[A-Za-z0-9_-]{30,}")
+
+
+def _reason(code, description, retry):
+    """Erklaert einen Telegram-Fehler auf Deutsch. Ohne Token, ohne URL."""
+    text = (description or "").lower()
+    if code == 401:
+        return "Token ungültig oder widerrufen. Bot-Token bei @BotFather neu kopieren."
+    if code == 404:
+        return "Token unbekannt (Telegram findet den Bot nicht). Bot-Token prüfen."
+    if code == 400 and "chat not found" in text:
+        return (
+            "Chat-ID unbekannt. Schreibe deinem Bot zuerst /start und prüfe die Chat-ID."
+        )
+    if code == 403:
+        return "Der Bot darf dir nicht schreiben (blockiert oder aus dem Chat entfernt)."
+    if code == 429:
+        return f"Telegram-Ratenlimit, Wartezeit {retry or 60} s."
+    if isinstance(code, int) and code >= 500:
+        return f"Telegram-Server meldet Fehler (HTTP {code}), späterer Versuch."
+    if code is None:
+        return description
+    return f"Telegram lehnt ab (HTTP {code}): {description}"
+
+
 class Telegram:
     def __init__(self, token: str, chat_id: str, timeout: float = 15.0):
-        self.token = token
-        self.chat_id = chat_id
+        # Leerzeichen und Zeilenumbrüche vom Einfügen würden die Adresse ungültig machen.
+        self.token = (token or "").strip()
+        self.chat_id = str(chat_id or "").strip()
         self.timeout = timeout
         self.resume_at = 0
+        self.last_error = ""
 
     @property
     def configured(self) -> bool:
         return bool(self.token and self.chat_id)
 
-    def send(self, text: str) -> bool:
-        if time.monotonic() < self.resume_at:
-            return False
-        if not self.configured:
-            log.warning("Telegram nicht eingerichtet – Nachricht nur im Log:\n%s", text)
-            return False
+    def _call(self, method, payload):
+        """Ein Aufruf. Ergebnis: ok, result, code, reason, retry, description."""
+        out = dict(ok=False, result=None, code=None, retry=None, description="")
         try:
             answer = read_json(
-                f"https://api.telegram.org/bot{self.token}/sendMessage",
-                data=json.dumps(
-                    {
-                        "chat_id": self.chat_id,
-                        "text": text,
-                        "parse_mode": "HTML",
-                        "link_preview_options": {"is_disabled": True},
-                    }
-                ).encode(),
+                f"https://api.telegram.org/bot{self.token}/{method}",
+                data=json.dumps(payload).encode(),
                 headers={"Content-Type": "application/json"},
                 timeout=self.timeout,
             )
-            return answer.get("ok") is True
-        except (OSError, ValueError) as exc:
-            if isinstance(exc, HTTPError):
-                if exc.code == 429:
-                    try:
-                        delay = int(
-                            json.loads(exc.read(16384))
-                            .get("parameters", {})
-                            .get("retry_after", 60)
-                        )
-                    except (ValueError, OSError, AttributeError, TypeError):
-                        delay = 60
-                    self.resume_at = time.monotonic() + max(1, delay)
-                exc.close()
-            log.error(
-                "Telegram-Versand fehlgeschlagen (%s)",
-                exc.code if isinstance(exc, HTTPError) else type(exc).__name__,
+            out.update(ok=answer.get("ok") is True, result=answer.get("result"))
+            if not out["ok"]:
+                out.update(code=answer.get("error_code"), description=str(answer.get("description", "")))
+        except HTTPError as exc:
+            try:
+                body = json.loads(exc.read(16384))
+            except (ValueError, OSError, AttributeError):
+                body = {}
+            exc.close()
+            out.update(
+                code=exc.code,
+                description=str(body.get("description", "")),
+                retry=(body.get("parameters") or {}).get("retry_after"),
             )
+        except (OSError, ValueError, HTTPException) as exc:
+            out.update(description=f"Keine Verbindung zu Telegram ({type(exc).__name__}). Internet prüfen.")
+        out["reason"] = "" if out["ok"] else _reason(out["code"], out["description"], out["retry"])
+        return out
+
+    def _send(self, text, formatted):
+        payload = {
+            "chat_id": self.chat_id,
+            "text": text,
+            "link_preview_options": {"is_disabled": True},
+        }
+        if formatted:
+            payload["parse_mode"] = "HTML"
+        return self._call("sendMessage", payload)
+
+    def send(self, text: str) -> bool:
+        if time.monotonic() < self.resume_at:
+            self.last_error = self.last_error or "Telegram-Ratenlimit, Wartezeit läuft noch."
             return False
+        if not self.configured:
+            self.last_error = "Telegram nicht eingerichtet."
+            log.warning("Telegram nicht eingerichtet – Nachricht nur im Log:\n%s", text)
+            return False
+        res = self._send(text, True)
+        if not res["ok"] and res["code"] == 400 and "parse entities" in res["description"].lower():
+            # Ein Sonderzeichen im Inserat darf den Alarm nicht verhindern: ohne Formatierung erneut.
+            res = self._send(html.unescape(re.sub(r"<[^>]+>", "", text)), False)
+        if res["ok"]:
+            self.last_error = ""
+            return True
+        if res["code"] == 429:
+            self.resume_at = time.monotonic() + max(1, int(res["retry"] or 60))
+        self.last_error = res["reason"]
+        log.error("Telegram-Versand fehlgeschlagen: %s", res["reason"])
+        return False
+
+    def check(self):
+        """Test fuer Einstellungen und Diagnose. Ergebnis: (ok, Meldung auf Deutsch)."""
+        if not self.token:
+            return False, "Es ist kein Bot-Token eingetragen."
+        if not TOKEN_FORMAT.fullmatch(self.token):
+            return (
+                False,
+                "Der Token hat nicht das Format 123456789:ABC... Bitte bei @BotFather neu kopieren.",
+            )
+        if not self.chat_id:
+            return False, "Es ist keine Chat-ID eingetragen."
+        me = self._call("getMe", {})
+        if not me["ok"]:
+            return False, me["reason"]
+        name = (me["result"] or {}).get("username", "?")
+        sent = self._send("FlipRadar – Telegram-Test erfolgreich.", False)
+        if not sent["ok"]:
+            return False, f"Bot @{name} ist gültig, aber: {sent['reason']}"
+        return True, f"Telegram funktioniert (Bot @{name})."

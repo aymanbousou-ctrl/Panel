@@ -60,7 +60,13 @@ class Radar:
             log.warning(
                 "eBay.de inaktiv: Produktionsschluessel fehlen. Beim Start E fuer Einstellungen waehlen."
             )
+        log.info(
+            "Telegram-Alarme von: %s | nur sammeln: %s",
+            ", ".join(p for p in self.platforms if p not in self.collect_only) or "keiner Quelle",
+            ", ".join(p for p in self.platforms if p in self.collect_only) or "keine",
+        )
         self.store.conn.executescript("""
+            CREATE TABLE IF NOT EXISTS source_status(platform TEXT PRIMARY KEY, last_ok REAL, last_new REAL, last_error TEXT, last_error_at REAL);
             CREATE TABLE IF NOT EXISTS paid_runs(platform TEXT, product TEXT, last REAL, PRIMARY KEY(platform, product));
             CREATE TABLE IF NOT EXISTS pauses(platform TEXT PRIMARY KEY, until REAL, reason TEXT);
             CREATE TABLE IF NOT EXISTS opportunities(key TEXT PRIMARY KEY,product TEXT,first_day TEXT);
@@ -158,9 +164,11 @@ class Radar:
                         )
                     self._paused(name, end, reason)
                     count["Fehler"] += 1
+                    self._note(name, error=reason)
                     paused.add(name)
                     continue
                 count["Suchen"] += 1
+                self._note(name)
                 count["Inserate"] += len(listings)
                 log.info("%s: %d Inserate", name, len(listings))
                 if product is probe:
@@ -287,6 +295,9 @@ class Radar:
                 type(exc).__name__,
             )
         for n, c in stats.items():
+            if c["neu"]:
+                self._note(n, new=True)
+            self._log_status(n)
             log.info(
                 "%s: %d erfolgreiche Suchen, %d Inserate, %d neu, %d Deals%s",
                 n,
@@ -311,6 +322,57 @@ class Radar:
         pending = db.conn.execute("SELECT COUNT(*) FROM pending").fetchone()[0]
         log.info("Durchlauf fertig. Telegram ausstehend: %d", pending)
         return stats
+
+    def _note(self, name, error="", new=False):
+        now = time.time()
+        with self.store.conn:
+            self.store.conn.execute(
+                "INSERT OR IGNORE INTO source_status(platform) VALUES(?)", (name,)
+            )
+            if error:
+                self.store.conn.execute(
+                    "UPDATE source_status SET last_error=?, last_error_at=? WHERE platform=?",
+                    (error[:160], now, name),
+                )
+            elif new:
+                self.store.conn.execute(
+                    "UPDATE source_status SET last_new=? WHERE platform=?", (now, name)
+                )
+            else:
+                self.store.conn.execute(
+                    "UPDATE source_status SET last_ok=? WHERE platform=?", (now, name)
+                )
+
+    def _log_status(self, name):
+        row = self.store.conn.execute(
+            "SELECT last_ok,last_new,last_error,last_error_at FROM source_status WHERE platform=?",
+            (name,),
+        ).fetchone()
+        if not row:
+            return
+
+        def when(ts):
+            return datetime.fromtimestamp(ts).strftime("%d.%m. %H:%M") if ts else "noch nie"
+
+        ok, new, error, error_at = row
+        log.info(
+            "Status %s: letzter Abruf %s · letzte neue Inserate %s · letzter Fehler %s",
+            name,
+            when(ok),
+            when(new),
+            f"{when(error_at)} ({error})" if error else "keiner",
+        )
+        # Eine Suche kann funktionieren und trotzdem stundenlang dieselben Treffer liefern.
+        if (
+            not PLATFORMS[name].paid
+            and ok
+            and new
+            and ok - new > 6 * 3600
+        ):
+            log.warning(
+                "%s liefert seit mehr als 6 Stunden keine neuen Inserate. Suche oder Seite prüfen.",
+                name,
+            )
 
     def _due(self, name, product):
         """Bezahlte Quellen laufen nur fuer gewaehlte Produkte und mit Mindestabstand.

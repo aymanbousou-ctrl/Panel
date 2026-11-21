@@ -1,4 +1,4 @@
-"""FlipRadar 2.1. Run from any working directory."""
+"""FlipRadar 2.2. Run from any working directory."""
 
 import argparse
 import logging
@@ -79,7 +79,7 @@ def main():
             handlers=[logging.StreamHandler(sys.stdout), logger],
         )
         tg = Telegram(s.telegram_token, s.telegram_chat_id)
-        log.info("FlipRadar 2.1 | Python %s | %s", sys.version.split()[0], folder)
+        log.info("FlipRadar 2.2 | Python %s | %s", sys.version.split()[0], folder)
         log.info(
             "%d Produkte | Schwelle %.0f %% | bis %.0f CHF | Zielintervall %.1f Minuten",
             len(products),
@@ -90,7 +90,9 @@ def main():
         if args.mode == "test-telegram":
             if args.no_alerts:
                 return 0
-            return 0 if tg.send("FlipRadar 2.1 – Telegram-Test erfolgreich.") else 1
+            ok, message = tg.check()
+            print(message)
+            return 0 if ok else 1
         if args.mode == "stats":
             db = Store(s.db_path)
             try:
@@ -138,12 +140,14 @@ def main():
                     log.warning(
                         "%s: %s %s", name, type(exc).__name__, getattr(exc, "code", "")
                     )
-            if (
-                not args.no_alerts
-                and tg.configured
-                and not tg.send("FlipRadar 2.1 – Telegram-Test erfolgreich.")
-            ):
-                failures += 1
+            if s.ebay_client_id and s.ebay_client_secret and "ebay" in s.platforms:
+                ok, message = ebay.check()
+                (log.info if ok else log.warning)("eBay: %s", message)
+                failures += not ok
+            if not args.no_alerts:
+                ok, message = tg.check()
+                (log.info if ok else log.warning)("Telegram: %s", message)
+                failures += not ok
             return int(bool(failures))
         db = Store(s.db_path)
         try:

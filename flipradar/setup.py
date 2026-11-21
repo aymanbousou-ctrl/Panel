@@ -138,7 +138,7 @@ def edit(folder):
     cfgpath = folder / "config.yaml"
     cfg = yaml.safe_load(cfgpath.read_text(encoding="utf-8"))
     root = tk.Tk()
-    root.title("FlipRadar 2.1 – Einstellungen")
+    root.title("FlipRadar 2.2 – Einstellungen")
     fields = [
         ("Telegram Bot-Token", "telegram", "token", True),
         ("Telegram Chat-ID", "telegram", "chat_id", False),
@@ -205,6 +205,28 @@ def edit(folder):
         messagebox.showinfo("FlipRadar", "Gespeichert. Die Suche startet jetzt.")
         root.destroy()
 
+    def test_telegram():
+        from .notify import Telegram
+
+        ok, message = Telegram(entries[0][2].get(), entries[1][2].get()).check()
+        (messagebox.showinfo if ok else messagebox.showwarning)("Telegram-Test", message)
+
+    def test_ebay():
+        from types import SimpleNamespace
+        from .sources import Ebay
+
+        ok, message = Ebay(
+            SimpleNamespace(
+                ebay_client_id=entries[2][2].get().strip(),
+                ebay_client_secret=entries[3][2].get().strip(),
+            )
+        ).check()
+        (messagebox.showinfo if ok else messagebox.showwarning)("eBay-Test", message)
+
+    buttons = ttk.Frame(root)
+    buttons.grid(row=14, column=0, sticky="w", padx=10, pady=12)
+    ttk.Button(buttons, text="Telegram testen", command=test_telegram).pack(side="left")
+    ttk.Button(buttons, text="eBay testen", command=test_ebay).pack(side="left", padx=6)
     ttk.Button(root, text="Speichern und suchen", command=commit).grid(
         row=14, column=1, pady=12, sticky="e", padx=10
     )

@@ -1,4 +1,4 @@
-# FlipRadar 2.1 für Windows und Python 3.15
+# FlipRadar 2.2 für Windows und Python 3.15
 
 ## Start und Umstieg
 
@@ -69,4 +69,13 @@ Zusätzlich zu Tutti, Ricardo und eBay gibt es **Marktplaats** (NL), **Vinted.de
 - Die Suchbegriffe müssen zur Sprache passen. Mit `queries:` in der Watchlist legst du für eine Plattform einen eigenen Begriff fest, zum Beispiel `ps5` statt `ps5 konsole`.
 - Gesuche und Defekte filtert FlipRadar mit Begriffen der jeweiligen Sprache heraus.
 - **Kleinanzeigen** bleibt wie beschrieben ausgeschaltet, solange keine schriftliche Freigabe eingetragen ist.
+
+
+
+## Telegram und eBay testen, Quellenstatus
+
+- In **EINSTELLUNGEN.cmd** gibt es die Knöpfe **Telegram testen** und **eBay testen**. Sie nennen die Ursache, zum Beispiel „Token ungültig“, „Chat-ID unbekannt“, „Produktionsfreigabe fehlt“ oder „Tageskontingent ausgeschöpft“.
+- Im Suchfenster steht beim Start eine Zeile, von welchen Quellen Telegram-Alarme kommen können und welche nur sammeln. Quellen, die nur sammeln (Marktplaats, Vinted, Subito, Wallapop, Leboncoin), senden nie eine Nachricht.
+- Nach jeder Runde zeigt jede Quelle ihren letzten Abruf, die letzten neuen Inserate und den letzten Fehler. Liefert eine Quelle seit sechs Stunden nichts Neues, erscheint eine Warnung.
+- Schlägt ein Telegram-Versand fehl, steht der Grund im Fenster. Bei einem Formatfehler sendet FlipRadar die Nachricht ohne Formatierung erneut. Beim Ratenlimit wartet es die von Telegram genannte Zeit ab.
 
