@@ -300,7 +300,7 @@ class Checks(unittest.TestCase):
             ).encode()
 
         items = marktplaats(html(rows))
-        self.assertEqual(len(items), 1)
+        self.assertEqual([(i.listing_id, i.negotiable) for i in items], [("m1", False), ("m2", True)])
         x = items[0]
         self.assertEqual((x.listing_id, x.price, x.currency, x.location), ("m1", 779.95, "EUR", "Utrecht"))
         self.assertEqual(x.url.split("/v/")[0], "https://www.marktplaats.nl")

@@ -157,10 +157,10 @@ def kleinanzeigen(data):
 
 
 def marktplaats(data):
-    """Liest die Suchergebnisse aus __NEXT_DATA__. Nur Festpreise ('FIXED').
+    """Liest die Suchergebnisse aus __NEXT_DATA__.
 
-    'MIN_BID' (Bieden vanaf) ist ein Mindestgebot und kein Kaufpreis, 'FAST_BID' hat
-    gar keinen Preis. Beides bleibt draussen, wie bei Ricardo ohne Sofortkauf.
+    'FIXED' ist ein Festpreis. 'MIN_BID' (Bieden vanaf) ist ein Mindestgebot und wird
+    als verhandelbar markiert. 'FAST_BID' hat keinen Preis und bleibt draussen.
     """
     script = page(data).find("script", id="__NEXT_DATA__")
     if not script:
@@ -178,7 +178,7 @@ def marktplaats(data):
             raise ValueError("Marktplaats-Inseratformat unbekannt")
         cents = info.get("priceCents")
         if (
-            info["priceType"] != "FIXED"
+            info["priceType"] not in ("FIXED", "MIN_BID")
             or row.get("reserved")
             or not isinstance(cents, int)
             or cents <= 0
@@ -195,6 +195,7 @@ def marktplaats(data):
             "EUR",
             location=place.get("cityName") or "",
             description=row.get("description") or "",
+            negotiable=info["priceType"] == "MIN_BID",
         )
     return list(result.values())
 
