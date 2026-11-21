@@ -1,85 +1,61 @@
-# FlipRadar 2.0 für Windows
+# FlipRadar 2.1 für Windows und Python 3.15
 
-FlipRadar beobachtet deine Watchlist, schätzt den Wiederverkaufswert in der Schweiz und sendet passende Angebote mit Preis, Rechnung und Inserat-Link an deinen Telegram-Chat. Der PC muss eingeschaltet und das Programm geöffnet bleiben.
+## Start und Umstieg
 
-## In drei Schritten starten
+1. Beende das alte FlipRadar-Fenster. Rechtsklick auf die neue ZIP-Datei → **Alle extrahieren**.
+2. Öffne im entpackten Ordner **START.cmd** per Doppelklick. FlipRadar nutzt bevorzugt deinen installierten Python 3.15 und enthält die benötigten Bibliotheken. Beim Start entfällt die Paketinstallation.
+3. Beim ersten Start übernimmt FlipRadar die Einstellungen, Watchlist und eine Kopie der Datenbank aus **%LOCALAPPDATA%\FlipRadarV2**, andernfalls aus der erkannten V1.2 unter Dokumente oder Downloads. Die neue Version hat einen eigenen Datenordner **%LOCALAPPDATA%\FlipRadarV21**. Eigene Watchlist-Einträge bleiben erhalten, auch deaktivierte Einträge. Bei einer frischen Installation richtest du Telegram mit **EINSTELLUNGEN.cmd** ein.
 
-1. Schließe das laufende V1-Fenster. Klicke im Explorer mit der rechten Maustaste auf die neue ZIP-Datei, wähle **Alle extrahieren** und öffne den entpackten Ordner **FlipRadar_2.0**.
-2. Doppelklicke auf **START.cmd**. Nach fünf Sekunden beginnt die Suche automatisch. Der Starter verwendet bevorzugt dein installiertes Python 3.15. Die mitgelieferten Python-Bibliotheken funktionieren ohne Paketinstallation oder Compiler.
-3. Beim ersten Start übernimmt V2 die Einstellungen, die Watchlist und eine SQLite-Kopie der vorhandenen Datenbank. Es sucht zuerst unter `Dokumente\FlipRadar_v1.2\flipradar`, dann unter `Downloads\FlipRadar_v1.2\flipradar`. Voraussetzung ist eine dort vorhandene `config.yaml`. Bei einer frischen Installation wählst du beim Start **E**, um Bot-Token und Chat-ID einzutragen.
-
-**S** startet die Suche sofort. **E** öffnet die Einstellungen für Telegram, eBay, Kaufpreis, Gewinnschwelle, Intervall und Wechselkurs. **D** fragt je aktivierter Quelle ein Produkt ab und sendet bei konfiguriertem Telegram eine Testnachricht. Während FlipRadar läuft, beendet **Strg+C** die Suche. Vor einem Wechsel zu E oder D das laufende Fenster beenden.
-
-## Was sendet FlipRadar?
-
-Voreingestellt sind 33 Produkte, bis zu 2'000 CHF Kaufpreis, mindestens 20 % geschätzter Nettogewinn bezogen auf den Einsatz und ein Zielintervall von fünf Minuten. Pro Suchbegriff verarbeitet FlipRadar die von der ersten Ergebnisseite bereitgestellten Inserate, standardmäßig höchstens 40 pro Plattform. Sortierung und Umfang der öffentlich sichtbaren Ergebnisse bestimmt der Marktplatz. Ein langer Durchlauf wird abgeschlossen, bevor der nächste beginnt. Im Fenster steht die tatsächliche Wartezeit.
-
-Ein neuer Fund oder ein Preisrückgang von mehr als 3 % gegenüber der letzten Beobachtung kann einen Alarm auslösen. Ein Angebot, dem zunächst Vergleichspreise fehlten, wird bei erneuter Sichtung wieder bewertet. Bei einer leeren Datenbank sammelt der erste erfolgreiche Durchlauf nur Vergleichspreise. Es gibt keine regelmäßige Telegram-Zusammenfassung bei null Deals.
-
-**So liest du das Fenster.** Die Zahlen je Suche zählen gelesene Inserate vor Produkt- und Margenfilter. Ein Inserat kann in mehreren Suchen vorkommen. „Neu“ zählt erstmals gespeicherte Inserate. „Telegram gesendet“ bestätigt, dass Telegram die Nachricht angenommen hat. Scheitert ein Versand, merkt ihn die Datenbank vor. Der nächste aktive Durchlauf versucht es erneut. Falls Telegram eine Nachricht annimmt und die Antwort auf dem Rückweg verloren geht, kann eine Nachricht doppelt ankommen.
-
-## Quellen
-
-| Quelle | So kommen die Angebote ins Programm |
+| Doppelklick | Funktion |
 |---|---|
-| Tutti.ch | V2 lädt die öffentliche deutschsprachige Suchseite und liest die darin bereits ausgelieferten Inserate. Die GraphQL-URL aus V1 wird nicht angefragt. |
-| Ricardo.ch | V2 liest die öffentliche Suchergebnisseite. Nur Angebote mit erkennbarem Sofortkaufpreis werden übernommen. Bei einem Angebot mit Gebot und Sofortkauf zählt der Sofortkaufpreis. Es wird kein separater Browser installiert. |
-| Kleinanzeigen.de | V2 liest Titel, Link und Angebotspreis aus den sichtbaren Trefferkarten. „VB“ ohne Betrag liefert keinen bewertbaren Kaufpreis. |
-| Marktplaats.nl (NL) | V2 liest die öffentliche Suchseite (erste Ergebnisseite, nach Relevanz sortiert). Festpreise und „Bieden vanaf“ (als verhandelbar markiert) zählen. Inserate ohne Preis werden übersprungen. Läuft immer im Modus „nur sammeln“: Preise werden gespeichert, aber es gibt keinen Telegram-Alarm. |
-| Wallapop (ES) | Läuft wie Subito über Apify (Scraper `blackfalcondata/wallapop-scraper`, ca. 0,00025 $ pro Treffer plus 0,005 $ pro Lauf), neueste zuerst. Nur „nur sammeln“. |
-| Leboncoin (FR) | Läuft wie Subito über Apify (Scraper `clearpath/leboncoin-api`, ca. 0,0015 $ pro Treffer plus 0,009 $ pro Lauf, mindestens 10 Treffer pro Lauf), neueste zuerst. Verkäuferprofile und Telefonnummern sind abgeschaltet. Nur „nur sammeln“. |
-| Vinted.de | V2 liest die öffentliche Katalogseite (erste Seite, nach Relevanz). Als Preis zählt der Artikelpreis inklusive Käuferschutz, ohne Versand. Läuft immer im Modus „nur sammeln“. Aktivieren wie bei Marktplaats mit `- vinted` unter `platforms:`. |
-| Subito.it (IT) | Direkter Abruf wird vom Server mit 403 abgewiesen. V2 nutzt deshalb den Dienst **Apify** (Dritter, kostenpflichtig, Scraper `epicscrapers/subito-scraper`). Läuft immer im Modus „nur sammeln“. |
-| eBay.de | V2 verwendet die offizielle Browse API für Festpreisangebote mit Artikelstandort Deutschland und Preis in EUR. Erforderlich sind eigene für die Produktion berechtigte Schlüssel. Ohne sie meldet V2 den fehlenden Zugang und durchsucht die anderen aktiven Quellen. |
+| **START.cmd** | Startet die Suche. Im geöffneten Fenster siehst du Suchfortschritt, Ausfälle, die nächste Runde und den Versand. Beenden mit Strg+C. |
+| **EINSTELLUNGEN.cmd** | Öffnet die Einstellungen für Einzelkauf, Los, Gesamtkapital, Rabatt, B-Ware, Marge, Telegram und eBay. Schließe dazu zuerst das Suchfenster. Nach dem Speichern startet die Suche. |
+| **BESTAND.cmd** | Erfasst Einkauf und Verkauf in einem eigenen Fenster, auch während der Suche. Die Zahlen gelten ab dem nächsten Durchlauf. |
+| **TRENDS.cmd** | Öffnet die nach jeder Runde aktualisierte Tabelle in deiner Standardanwendung für CSV. Schließe die Tabelle nach dem Lesen, wenn Excel die Datei für Änderungen sperrt. |
 
-**Marktplaats einschalten.** Öffne `%LOCALAPPDATA%\FlipRadarV2\config.yaml` mit dem Editor und füge unter `platforms:` die Zeile `- marktplaats` hinzu (oder schreibe `marktplaats` in die eckige Klammer). Beim nächsten Start sucht V2 dort mit. Die Quelle sammelt nur. Gesuche und Defekte filtert V2 mit niederländischen Begriffen wie „gezocht“ und „defect“ heraus.
+## Was FlipRadar sucht
 
-**Subito, Wallapop und Leboncoin über Apify einschalten.** Dieselben Einstellungen gelten für alle drei: `- subito`, `- wallapop` oder `- leboncoin` unter `platforms:`. Jeder Lauf verbraucht Apify-Guthaben, die Nutzungsbedingungen von Subito und Apify liegen in deiner Verantwortung. In `config.yaml` stehen dafür: `- subito` unter `platforms:` und ein Block `apify:` mit `token`, `products` (Namen aus der Watchlist, nur diese werden gesucht), `interval_minutes` (Mindestabstand je Produkt, Standard 720) und `max_results` (Treffer pro Lauf, Standard 20). Den Token trägst du mit **E** ein. Beispiel: 10 Produkte, 20 Treffer, zwei Läufe pro Tag sind 400 Treffer am Tag, etwa 0,40 $. Der Scraper kostet laut Apify im Gratis-Tarif 0,001 $ pro Treffer plus eine kleine Startgebühr, also etwa 2 Cent für 20 Treffer. Subito liefert die neuesten Inserate zuerst und beachtet den Höchstpreis. Der Suchbegriff muss zur Sprache passen: Mit `queries:` in der Watchlist legst du für eine Plattform einen eigenen Begriff fest (z. B. `ps5` statt `ps5 konsole`). Ein Fehlschlag wird nicht vor Ablauf des Abstands wiederholt.
+Die Standardliste startet mit **138 Modell-Suchen**, darunter 105 neue. Dazu gehören u. a. Makita DDF484, Bosch-Werkzeuge, Fluke-Messgeräte, Switch Lite, Xbox Series S, iPhone 13 mini, Pixel 9 Pro, VW Polo, Toyota Corolla, Sony A6400, GoPro, Dyson und Garmin. Du kannst im Datenordner weitere Modelle in **watchlist.yaml** ergänzen oder mit **enabled: false** ausschalten.
 
-**eBay einschalten.** Besorge im eBay Developers Program Produktionsberechtigung für die Buy APIs. Unter **Application Keys → Production** findest du App ID (Client ID) und Cert ID (Client Secret). Trage beide beim Start mit **E** ein. Ein normales Käuferkonto, Sandbox-Schlüssel oder ein eBay-Passwort genügen für diese Schnittstelle nicht. Mit **D** prüfst du danach die Verbindung. Beachte das Kontingent deines eBay-Schlüssels. Falls du keinen API-Zugang hast, bietet eBay für gespeicherte Suchen eigene E-Mail-Meldungen an. Diese laufen separat von FlipRadar und dessen Margenfilter.
+Je Runde sind bis zu **30 Modell-Suchen** vorgesehen. Bei größerem Katalog rotieren 15 Plätze durch die gesamte Liste. Die übrigen Plätze bevorzugen Modelle mit steigenden eigenen Verkäufen und positivem mittlerem Gewinn, steigenden importierten Verkäufen, schnellen eigenen Verkäufen oder wiederkehrenden Kaufgelegenheiten. Preisalarme können eintreffen, sobald das jeweilige Produkt erneut geprüft wird. Bei den 138 Standardmodellen kommt jedes innerhalb von höchstens zehn abgeschlossenen Runden an die Reihe. Eine Runde hat zunächst fünf Minuten Zielintervall. Langsame oder pausierte Quellen verlängern die Zeit bis zum nächsten erfolgreichen Abruf.
 
-**Wenn eine Quelle ausfällt.** Bei HTTP 401/403 pausiert V2 diese Quelle für eine Stunde. Bei HTTP 429 berücksichtigt es „Retry-After“. Fehlt die Wartezeit, sind 30 Minuten eingestellt. Sonstige Abruf- und Formatfehler pausieren die Quelle für fünf Minuten. Die angezeigte Uhrzeit gilt auch nach einem Neustart. Die anderen Quellen laufen weiter. Unveränderte Wiederholungen nach jeder einzelnen Produktsuche hätten die Ursache der 33 Tutti-Fehler aus V1 nicht behoben.
+Zusätzlich läuft pro Runde eine breitere Suche, beispielsweise nach Akkuschraubern, Kopfhörern oder Toyota-Modellen. FlipRadar erkennt Modellbezeichnungen in zehn hinterlegten Produktfamilien. Taucht ein weiteres Modell in mindestens vier verschiedenen Inserat-IDs mit Erstsichtungen an mindestens zwei Tagen innerhalb von 28 Tagen auf, wird es ab der nächsten Runde mitgesucht. So können bis zu 50 zusätzliche Modelle in die Rotation kommen. Die Schwelle dient der Auswahl von Suchbegriffen. Für Geldbeträge und Telegram gelten danach die gleichen Regeln wie bei anderen Modellen. Mit **discovery: false** lässt sich die Erkennung deaktivieren. Einzelne entdeckte Namen können unter **disabled_models** in der Konfiguration ausgeschlossen werden.
 
-## Preisrechnung
+## Wie du Trends und Wiederverkaufschancen liest
 
-Die Vorgaben aus deiner Konfiguration haben Vorrang. Die Voreinstellungen nehmen für den Schweizer Marktwert den um Ausreißer bereinigten Median aus mindestens acht Vergleichsinseraten der letzten 30 Tage auf Tutti und Ricardo. Das angebotene Objekt wird anhand seiner Plattform-ID aus seinen eigenen Vergleichsdaten ausgeschlossen. Den Median der Angebotspreise multipliziert V2 standardmäßig mit 0,92. Bei zu wenigen Daten kann ein eigener Referenzpreis aus der Watchlist einspringen. Mit genügend abgeschlossenen eigenen Verkäufen verwendet V2 deren Median vorrangig.
+**TRENDS.cmd** zeigt je Modell die Zahl erstmals gesehener Inserate und die Tage mit erfolgreicher Suche für die letzten sieben Kalendertage und die Vorwoche. Die erste Woche kann durch die Ersterfassung vieler bereits bestehender Inserate besonders groß aussehen. Eine ausgefallene Quelle kann die Zahlen senken. Neu eingestellte oder verschwundene Anzeigen belegen keinen Verkauf.
 
-| Beispiel mit Standardkosten | Betrag |
+Für die Nachfrage vergleicht FlipRadar deine eingetragenen Verkäufe der beiden Wochen. Eine optionale Verkaufspreis-Datei **sales_csv** wird separat ausgewiesen. Für die **30-Tage-Verkaufsquote** zählen nur Einheiten, deren Einkauf mindestens 30 Tage zurückliegt. Der Zähler enthält die davon innerhalb von 30 Tagen verkauften Einheiten, der Nenner auch die Ladenhüter. Ab zehn solchen Einheiten zeigt FlipRadar die Quote und die absoluten Zahlen an, beispielsweise **60 % (6/10)**. Bis dahin steht **offen**. Diese Quote beschreibt deinen bisherigen Absatz je Modell. Sie erfasst weder die gesamte Marktnachfrage noch die besondere Absatzchance einer einzelnen B-Ware-Einheit.
+
+**BESTAND.cmd** verteilt beim Kauf die eingegebenen tatsächlichen Gesamtkosten centgenau auf die Stückzahl. Bei einem Verkauf wählst du die einzelne Einheit und erfasst den Erlös nach Gebühren, Versand und weiteren Verkaufskosten. Erfasse auch langsam verkäufliche Käufe. In der Trendtabelle steht der mediane realisierte Gewinn je Stück aus den letzten 90 Tagen. Wer bestehende Daten importiert, kann die semikolongetrennte Datei **Bestand.csv** im Datenordner bearbeiten. Je Einheit gibt es eine eindeutige ID, exakten Produktnamen, Einkaufsdatum und Einstand in CHF. Verkaufsdatum und Nettoerlös bleiben bis zum Verkauf leer. Beim externen Bearbeiten das Bestandsfenster schließen.
+
+## Einzelkauf, Mengenrabatt und B-Ware
+
+Du kannst **Maximaler Kaufpreis**, **Maximaler Gesamtpreis je Los** und **Gesamtkapital inkl. Bestand** unabhängig einstellen. Der Einstand noch offener Einheiten wird vom Gesamtkapital abgezogen. Das Los darf mehr als dein Einzelkauflimit kosten. Deine Beispielgrenze von **30 % Rabatt je Stück** ist voreingestellt. Eine Telegram-Meldung löst weder einen Kauf noch eine Kapitalreservierung aus. Mehrere gleichzeitige Angebote können zusammen das freie Budget übersteigen.
+
+Beispiel für fünf Geräte mit vergleichbaren Einzelangeboten zu 100 CHF und einem eindeutigen Paketpreis von 350 CHF:
+
+| Rechnung mit den Standardwerten | CHF |
 |---|---:|
-| Geschätzter Marktwert | 600 CHF |
-| Abzüglich 10 % Verkaufsgebühr | −60 CHF |
-| Abzüglich Versand-/Fahrtpauschale | −10 CHF |
-| Abzüglich Kaufpreis | −400 CHF |
-| Geschätzter Gewinn | **130 CHF** |
-| Gewinn geteilt durch Einsatz | **32,5 %** |
+| Einkauf je Einheit | 70 |
+| Geschätzter Gesamterlös nach Abschlag auf Angebotspreise (5 × 92) | 460 |
+| Verkaufsgebühren (10 %) | −46 |
+| Versand-/Verkaufspauschale (5 × 10) | −50 |
+| Einkaufspreis des Loses | −350 |
+| Geschätzter Nettogewinn | **14** |
 
-Deutsche Preise werden mit `eur_to_chf` umgerechnet. Der Wechselkurs ist ein konfigurierter Wert. `germany_extra_chf` deckt zusätzliche Kosten eines deutschen Kaufs ab und geht in den Einsatz ein. Modellabhängige Mindestpreise, Budget, `min_profit_chf` und `min_margin` steuern die Auswahl. Tatsächliche Versand-, Import- oder Reparaturkosten können von deinen Pauschalen abweichen. Modellvarianten, Zustand und bei Autos Kilometerstand und Baujahr können den Schätzwert stark verändern.
+Das ergibt 4 % Gewinn auf den Einsatz. Bei deiner Schwelle von 20 % bleibt der Alarm aus. Für einen Alarm müssen außerdem genügend passende Einzelangebote vorliegen, bei Standardkonfiguration mindestens acht. Ein Los zählt nie als Vergleichspreis für ein Einzelgerät. Es braucht eine klare Stückzahl im Titel und einen ausdrücklich erkennbaren Gesamtpreis. Unklare Mischpakete oder Stückpreise werden ausgefiltert. Titel und Beschreibungen sind je nach Quelle unterschiedlich ausführlich. Prüfe Menge, Lieferumfang und Preis im Originalinserat.
 
-Für bestätigte Neupreise kann ein Produkt eine `retail_url` von Digitec oder Galaxus haben. Ein lagernder Neupreis in CHF für die passende Artikelnummer begrenzt den geschätzten Wert. Gelingt der Abruf nicht, wird das protokolliert. Bei der mitgelieferten Watchlist ist ein Shoplink für die Nintendo Switch 2 hinterlegt.
+Gekennzeichnete **B-Ware**, Retouren und generalüberholte Ware erhalten eine eigene Vergleichsgruppe. Die zusätzliche Reserve beträgt anfangs **20 CHF je Einheit** und kann angepasst werden. Ungetestete oder als defekt erkannte Geräte werden ausgefiltert. Bei Handys berücksichtigt FlipRadar die angegebene Speicherkapazität, bei PS5 das Laufwerk, bei Autos Baujahrgruppen von drei Jahren und Kilometergruppen von 50.000 km. Fehlen diese Angaben, gibt es für das Angebot keinen Deal-Alarm. Motorisierung, Wartung, Akkuqualität und tatsächlicher Reparaturbedarf können den Wert weiter verändern.
 
-## Deine Daten
+## Quellen, Telegram und Daten
 
-Der im Fenster angezeigte Datenordner ist unter Windows standardmäßig **%LOCALAPPDATA%\FlipRadarV2**. Dort liegen `config.yaml`, `watchlist.yaml`, `flipradar.db` und das rotierende Protokoll `flipradar.log`. Derselbe Benutzer verwendet diesen Datenordner auch nach einem erneuten Entpacken. Die Zugangsdaten stehen lokal in der Konfiguration. Zum Teilen einer Fehlermeldung reichen die betreffenden Protokollzeilen.
+Tutti und Ricardo verwenden die öffentliche Suchergebnisseite. Bei Ricardo zählen erkannte Sofortkaufpreise. eBay.de verwendet die Browse API für Festpreisartikel mit Standort Deutschland. Dafür brauchst du freigeschaltete Produktionszugangsdaten in den Einstellungen. Beim Start prüft **D** die eingerichteten Quellen und sendet bei eingerichteter Verbindung einen Telegram-Test. Kleinanzeigen ist standardmäßig deaktiviert. Falls du eine schriftliche Freigabe hast, kannst du **kleinanzeigen_schriftliche_freigabe: true** setzen und die Quelle in **platforms** aufnehmen.
 
-Die Übernahme aus V1 ist einmalig und liest die alte Installation. Bereits verschickte Alarme bleiben bekannt. Frühere Ricardo-Preise, die auch Gebote gewesen sein könnten, zählen erst nach einer neuen Zuordnung aus einem V2-Sofortkauf wieder als Vergleich. Offene alte Ricardo-Alarme werden in der V2-Kopie verworfen. Liegt V1 woanders, kannst du die Dateien nach beendetem Programm manuell in den V2-Datenordner kopieren. Für die automatische sichere Datenbankübernahme verwende vorzugsweise einen der beiden erkannten V1-Pfade vor dem ersten Start.
+Ein Erstabruf je Produkt und Quelle sammelt den vorhandenen Bestand. Neue passende Inserate und relevante Preissenkungen können bei späteren Abrufen einen Alarm auslösen. Dazu müssen Preis, Datenlage, Budget und Mindestgewinn passen. Ein 403 pausiert die Quelle für eine Stunde. Andere Quellen laufen weiter. Bei 429 berücksichtigt die Suche die mitgeteilte Wartezeit. Ein tägliches lokales Limit begrenzt die eBay-Suchen des Radars. Es zählt keine externen Anwendungen auf demselben Schlüssel. Bei fehlgeschlagenem Telegram-Versand erfolgt ein neuer Versuch bei erneuter Sichtung und erfolgreicher Neubewertung.
 
-Eigene Verkäufe kannst du als CSV in UTF-8 mit den Spalten `sale_id,product,sold_on,price_chf` hinterlegen und den Namen bei `sales_csv` eintragen. `product` muss dem Namen aus der Watchlist entsprechen. `sold_on` hat das Format JJJJ-MM-TT, der Betrag ist der Brutto-Verkaufspreis in CHF.
+Die Schweizer Preisbasis bilden gewöhnlich mindestens acht passende Einzelangebote von Ricardo und Tutti aus 30 Tagen. Der Marktwert aus Angebotspreisen erhält standardmäßig einen Faktor von 0,92. Die optionale CSV **sales_csv** aus V2 mit den Spalten **sale_id,product,sold_on,price_chf** erfasst bestätigte Bruttopreise. Passende Verkaufspreise oder manuelle Referenzen können bei einfachen Standardartikeln in die Rechnung einfließen. Bei B-Ware und unterschiedenem Variantenmerkmal verlangt das Programm passende Vergleichsinserate. Eurobeträge werden zum eingestellten Wechselkurs umgerechnet. Versand, Gebühren, Kaufnebenkosten in Deutschland und B-Ware-Reserve sind konfigurierbare Annahmen. Die angegebenen Höchstpreise beziehen sich auf diese Annahmen.
 
-## Optionale Kommandozeile
+Telegram-Schlüssel und eBay-Zugangsdaten bleiben in der lokalen Konfiguration. Für eine Fehlersuche reichen die relevanten Zeilen aus **flipradar.log**. Teile keine Konfigurationsdatei mit Zugangsdaten. Bei der Übernahme werden offene Meldungen neu bewertet. V1-Ricardo-Daten mit möglichen Gebotspreisen dienen erst nach erneuter Sichtung als Vergleich. Beim ersten Profilvergleich sammelt V2.1 zusätzliche Varianten- und Zustandsmerkmale.
 
-Für die tägliche Nutzung genügt START.cmd. Im entpackten Programmordner gibt es außerdem diese Befehle.
-
-| Befehl | Wirkung |
-|---|---|
-| `py -3.15 radar.py once --no-alerts` | Ein echter Suchdurchlauf, Daten sammeln, keine Telegram-Nachrichten |
-| `py -3.15 radar.py stats` | Anzahl und Spanne der gespeicherten Schweizer Vergleichspreise pro Produkt |
-| `py -3.15 radar.py test-telegram` | Nur die Telegram-Verbindung testen |
-| `py -3.15 tests\test_v2.py` | Lokale Regressionstests ohne Zugangsdaten |
-
-## Quellen zur Fehlersuche und Anbindung
-
-- Öffentliche Tutti-Suchergebnisse und vom Betreiber ausgeschlossene API-Pfade. [Beispiel einer Suchseite](https://www.tutti.ch/de/q/rtx-4070-gaming/Ak6hSdHggNDA3MMCUwMDAwA) · [robots.txt](https://www.tutti.ch/robots.txt)
-- Öffentliche Ricardo-Suchergebnisse mit Geboten und Sofortkauf. [PS5 auf Ricardo](https://www.ricardo.ch/de/s/ps5/)
-- Bedeutung der Serverantworten. [HTTP 403](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/403) · [HTTP 429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429)
-- Offizielle eBay-Dokumentation. [Suche](https://developer.ebay.com/develop/api/buy/browse_api/item/search) · [Produktionszugang](https://developer.ebay.com/api-docs/buy/static/buy-requirements.html) · [Application Keys](https://developer.ebay.com/my/keys) · [Gespeicherte Suchen](https://www.ebay.de/help/default/default/gespeicherte-suchen?id=4051)
-- Die Bibliotheken und zugehörigen Lizenztexte liegen unter `vendor`.
+Die mitgelieferten Bibliotheken und Lizenzen stehen unter **vendor**. Die automatisierten Tests im Ordner **tests** laufen offline. Für Entwickler lautet der Befehl im entpackten Ordner `py -3.15 -m unittest discover -s tests`.

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import sqlite3
 from datetime import datetime, timedelta, timezone
 
@@ -21,6 +20,10 @@ CREATE TABLE IF NOT EXISTS listings (
     last_seen    TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_listings_product ON listings(product, last_seen);
+CREATE TABLE IF NOT EXISTS profiles(key TEXT PRIMARY KEY,units INTEGER,grade TEXT,variant TEXT,place TEXT);
+CREATE TABLE IF NOT EXISTS baseline(key TEXT PRIMARY KEY,price REAL);
+CREATE TABLE IF NOT EXISTS scan(product TEXT,day TEXT,PRIMARY KEY(product,day));
+CREATE TABLE IF NOT EXISTS calls(day TEXT PRIMARY KEY,n INTEGER);
 CREATE TABLE IF NOT EXISTS candidates (key TEXT PRIMARY KEY);
 CREATE TABLE IF NOT EXISTS retail (url TEXT PRIMARY KEY, checked REAL NOT NULL, price REAL);
 CREATE TABLE IF NOT EXISTS pending (key TEXT PRIMARY KEY, price REAL NOT NULL, message TEXT NOT NULL);
@@ -84,12 +87,22 @@ class Store:
             if old_price != listing.price_chf or row[1] != product_name:
                 self.conn.execute("DELETE FROM pending WHERE key=?", (listing.key,))
                 self.conn.execute("DELETE FROM candidates WHERE key=?", (listing.key,))
+            ref = self.conn.execute(
+                "SELECT price FROM baseline WHERE key=?", (listing.key,)
+            ).fetchone()
+            if ref:
+                old_price = ref[0]
             if listing.price_chf and (
                 old_price is None or listing.price_chf < old_price * 0.97
             ):
                 status = "billiger"
             else:
                 status = "bekannt"
+        if listing.price_chf:
+            self.conn.execute(
+                "INSERT OR IGNORE INTO baseline VALUES(?,?)",
+                (listing.key, listing.price_chf),
+            )
         if track and product_name and status in ("neu", "billiger"):
             self.conn.execute(
                 "INSERT OR IGNORE INTO candidates VALUES(?)", (listing.key,)
@@ -119,6 +132,40 @@ class Store:
         cur = self.conn.execute(sql, params)
         return [price for key, price in cur.fetchall() if key != exclude_key]
 
+    def single_prices(self, product, settings, listing, grade, variant):
+        since = _iso(
+            datetime.now(timezone.utc) - timedelta(days=settings.lookback_days)
+        )
+        rows = self.conn.execute(
+            """SELECT l.platform,l.title,p.place,l.price_chf FROM listings l
+            JOIN profiles p ON p.key=l.key WHERE product=? AND units=1 AND grade=? AND variant=?
+            AND l.key<>? AND last_seen>=? AND price_chf>=? AND price_chf>0""",
+            (product.name, grade, variant, listing.key, since, product.min_price_chf),
+        )
+        seen = {}
+        prices = []
+        for platform, title, place, price in rows:
+            if settings.value_platforms and platform not in settings.value_platforms:
+                continue
+            finger = (title.casefold().strip(), place.casefold().strip(), price)
+            if place and finger in seen and seen[finger] != platform:
+                continue
+            if (
+                place
+                and listing.location
+                and finger
+                == (
+                    listing.title.casefold().strip(),
+                    listing.location.casefold().strip(),
+                    listing.price_chf,
+                )
+                and platform != listing.platform
+            ):
+                continue
+            seen[finger] = platform
+            prices.append(price)
+        return prices
+
     def already_alerted(self, key: str, price_chf: float) -> bool:
         cur = self.conn.execute(
             "SELECT 1 FROM alerts WHERE key = ? AND price_chf <= ?", (key, price_chf)
@@ -129,6 +176,9 @@ class Store:
         self.conn.execute(
             "INSERT OR IGNORE INTO alerts (key, price_chf, sent_at) VALUES (?,?,?)",
             (key, price_chf, _iso(datetime.now(timezone.utc))),
+        )
+        self.conn.execute(
+            "INSERT OR REPLACE INTO baseline VALUES(?,?)", (key, price_chf)
         )
         self.conn.execute("DELETE FROM candidates WHERE key=?", (key,))
         self.conn.execute(
@@ -142,15 +192,12 @@ class Store:
                 "INSERT OR REPLACE INTO pending VALUES (?,?,?)", (key, price, message)
             )
 
-    def deliver(self, telegram, attempted=()):
-        for key, price, message in self.conn.execute(
-            "SELECT key,price,message FROM pending"
-        ).fetchall():
-            if (key, price) in attempted:
-                continue
-            if telegram.send(message):
-                self.mark_alerted(key, price)
-                logging.getLogger("flipradar").info("Telegram gesendet: %s", key)
+    def expire_pending(self):
+        with self.conn:
+            self.conn.execute(
+                "DELETE FROM pending WHERE key NOT IN (SELECT key FROM listings WHERE last_seen>=?)",
+                (_iso(datetime.now(timezone.utc) - timedelta(minutes=30)),),
+            )
 
     def stats(self, lookback_days=None, platforms=None) -> list[tuple]:
         filters = ["product IS NOT NULL", "price_chf > 0"]

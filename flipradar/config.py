@@ -9,13 +9,20 @@ from pathlib import Path
 import yaml
 
 from .models import Product
-from .platforms import PLATFORMS
 
 
 @dataclass
 class Settings:
     telegram_token: str = ""
     telegram_chat_id: str = ""
+    lot_budget_chf: float = 2000
+    portfolio_chf: float = 2000
+    lot_discount: float = 0.30
+    b_reserve_chf: float = 20
+    discovery: bool = True
+    disabled_models: list[str] = field(default_factory=list)
+    batch_size: int = 30
+    ebay_daily_calls: int = 4000
     interval_minutes: float = 5.0
     min_margin: float = 0.20  # 20 % Netto-Marge
     max_price_chf: float = 2000.0
@@ -31,8 +38,6 @@ class Settings:
     platforms: list[str] = field(
         default_factory=lambda: ["ricardo", "tutti", "kleinanzeigen", "ebay"]
     )
-    # Diese Plattformen werden nur gespeichert, ohne Telegram-Alarm.
-    collect_only: list[str] = field(default_factory=list)
     # Marktwert nur aus diesen Plattformen (dort verkaufst du wieder)
     value_platforms: list[str] = field(default_factory=lambda: ["ricardo", "tutti"])
     max_results_per_search: int = 40
@@ -40,10 +45,6 @@ class Settings:
     germany_extra_chf: float = 0
     sales_csv: str = ""
     min_profit_chf: float = 0.0
-    apify_token: str = ""
-    apify_products: list[str] = field(default_factory=list)  # Namen aus der Watchlist
-    apify_interval_minutes: float = 720.0  # Mindestabstand je Produkt und Quelle
-    apify_max_results: int = 20  # Treffer pro bezahltem Lauf
     ebay_client_id: str = ""
     ebay_client_secret: str = ""
     db_path: str = "flipradar.db"
@@ -67,16 +68,15 @@ def load_settings(path: str | Path) -> Settings:
     s.ebay_client_secret = os.environ.get("FLIPRADAR_EBAY_SECRET") or str(
         ebay.get("client_secret") or ""
     )
-    apify = data.get("apify") or {}
-    s.apify_token = os.environ.get("FLIPRADAR_APIFY_TOKEN") or str(
-        apify.get("token") or ""
-    )
-    s.apify_products = _as_list(apify.get("products"))
-    if apify.get("interval_minutes") is not None:
-        s.apify_interval_minutes = float(apify["interval_minutes"])
-    if apify.get("max_results") is not None:
-        s.apify_max_results = int(apify["max_results"])
     for key in (
+        "discovery",
+        "disabled_models",
+        "lot_budget_chf",
+        "portfolio_chf",
+        "lot_discount",
+        "b_reserve_chf",
+        "batch_size",
+        "ebay_daily_calls",
         "interval_minutes",
         "min_margin",
         "max_price_chf",
@@ -89,7 +89,6 @@ def load_settings(path: str | Path) -> Settings:
         "warmup_first_cycle",
         "platforms",
         "value_platforms",
-        "collect_only",
         "max_results_per_search",
         "request_delay_seconds",
         "db_path",
@@ -101,16 +100,22 @@ def load_settings(path: str | Path) -> Settings:
         if key in data and data[key] is not None:
             setattr(s, key, data[key])
     s.platforms = [p.lower() for p in s.platforms]
+    if data.get("kleinanzeigen_schriftliche_freigabe") is not True:
+        s.platforms = [p for p in s.platforms if p != "kleinanzeigen"]
+    if not (
+        0 <= s.lot_discount < 1
+        and s.portfolio_chf > 0
+        and s.lot_budget_chf > 0
+        and s.b_reserve_chf >= 0
+        and isinstance(s.batch_size, int)
+        and s.batch_size >= 1
+        and s.ebay_daily_calls >= 1
+    ):
+        raise ValueError("Los-/Budgeteinstellungen unplausibel")
     s.value_platforms = [p.lower() for p in s.value_platforms]
-    s.collect_only = [p.lower() for p in s.collect_only]
-    unknown = (set(s.platforms) | set(s.collect_only)) - set(PLATFORMS)
+    unknown = set(s.platforms) - {"ricardo", "tutti", "kleinanzeigen", "ebay"}
     if unknown:
         raise ValueError(f"Unbekannte Plattform(en) in config: {sorted(unknown)}")
-    if set(s.collect_only) - set(s.platforms):
-        raise ValueError("collect_only nennt eine Plattform, die nicht in platforms steht")
-    s.collect_only = sorted(
-        set(s.collect_only) | {n for n in s.platforms if PLATFORMS[n].collect_only}
-    )
     if not 0 < s.min_margin < 5:
         raise ValueError("min_margin als Anteil angeben, z. B. 0.20 für 20 %")
     if not 0 <= s.germany_extra_chf < float("inf") or not 0 < s.eur_to_chf < float(
@@ -128,10 +133,6 @@ def load_settings(path: str | Path) -> Settings:
         and s.request_delay_seconds >= 0
     ):
         raise ValueError("Unplausible Such- oder Bewertungsparameter in config.yaml")
-    if not (10 <= s.apify_interval_minutes <= 10080 and 1 <= s.apify_max_results <= 100):
-        raise ValueError(
-            "apify: interval_minutes 10 bis 10080 und max_results 1 bis 100 angeben"
-        )
     if s.sales_csv:
         s.sales_csv = str(Path(path).parent / s.sales_csv)
     return s
@@ -177,11 +178,6 @@ def load_watchlist(path: str | Path) -> list[Product]:
                 retail_url=item.get("retail_url"),
                 tutti_category=item.get("tutti_category"),
                 platforms=[p.lower() for p in _as_list(item.get("platforms"))] or None,
-                queries={
-                    str(k).lower(): str(v)
-                    for k, v in (item.get("queries") or {}).items()
-                }
-                or None,
             )
         )
     names = [p.name for p in products]

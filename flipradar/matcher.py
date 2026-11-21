@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
 import re
 import unicodedata
 
 from .models import Listing, Product
 
 
+@lru_cache(maxsize=8192)
 def normalize(text: str) -> str:
     text = unicodedata.normalize("NFKD", text or "").lower()
     text = "".join(c for c in text if not unicodedata.combining(c))
@@ -44,9 +46,3 @@ def match_product(listing: Listing, products: list[Product]) -> Product | None:
     if not hits:
         return None
     return max(hits, key=lambda p: (len(p.include), sum(len(g) for g in p.include)))
-
-
-def has_any(text: str, words) -> bool:
-    """Ganzes-Wort-Treffer fuer eine Liste von Begriffen."""
-    norm = normalize(text)
-    return any(_contains(norm, w) for w in words)

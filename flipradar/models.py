@@ -49,10 +49,6 @@ class Product:
     tutti_category: str | None = None  # z. B. cars, cellPhones, consolesGames
     platforms: list[str] | None = None  # None = alle aktiven
     retail_url: str | None = None
-    queries: dict[str, str] | None = None  # eigener Suchbegriff je Plattform
-
-    def query_for(self, platform: str) -> str:
-        return (self.queries or {}).get(platform, self.query)
 
 
 @dataclass
@@ -66,3 +62,9 @@ class Deal:
     margin: float
     retail_chf: float | None = None
     germany_extra_chf: float = 0
+    units: int = 1
+    max_offer: float = 0
+    discount: float = 0
+    reserve: float = 0
+    grade: str = "Standard"
+    spread: str = ""

@@ -7,7 +7,6 @@ from statistics import median
 
 from .config import Settings
 from .models import Deal, Listing, Product
-from .platforms import country
 
 _NUM = re.compile(r"\d[\d'’ .,]*")
 
@@ -89,6 +88,9 @@ def evaluate(
     settings: Settings,
     sold_prices: list[float] | None = None,
     retail_chf: float | None = None,
+    units: int = 1,
+    grade: str = "Standard",
+    available: float | None = None,
 ) -> Deal | None:
     """Prüft, ob ein Inserat die Deal-Kriterien erfüllt."""
     price = listing.price_chf
@@ -97,7 +99,12 @@ def evaluate(
     max_price = min(
         settings.max_price_chf, product.max_price_chf or settings.max_price_chf
     )
-    if price > max_price or price < product.min_price_chf:
+    if units > 1:
+        max_price = min(
+            settings.lot_budget_chf,
+            (product.max_price_chf or settings.lot_budget_chf) * units,
+        )
+    if price > max_price or price / units < product.min_price_chf:
         return None
     if sold_prices and len(sold_prices) >= settings.min_samples:
         value, source, n = robust_median(sold_prices), "verkauft", len(sold_prices)
@@ -107,14 +114,62 @@ def evaluate(
         return None
     if retail_chf is not None:
         value = min(value, retail_chf)
-    extra = settings.germany_extra_chf if country(listing.platform) == "DE" else 0
-    net_profit = (
-        value * (1 - settings.sell_fee_pct) - settings.shipping_chf - price - extra
+    extra = (
+        settings.germany_extra_chf
+        if listing.platform in {"kleinanzeigen", "ebay"}
+        else 0
     )
-    margin = net_profit / (price + extra)
+    available = settings.portfolio_chf if available is None else available
+    reserve = settings.b_reserve_chf * units if grade == "B-Ware" else 0
+    if price + extra + reserve > available:
+        return None
+    discount = 0.0
+    if units > 1:
+        if len(comparable_prices) < settings.min_samples:
+            return None
+        discount = 1 - price / (units * median(comparable_prices))
+        if discount + 1e-9 < settings.lot_discount:
+            return None
+    value *= units
+    net_profit = (
+        value * (1 - settings.sell_fee_pct)
+        - settings.shipping_chf * units
+        - price
+        - extra
+        - reserve
+    )
+    margin = net_profit / (price + extra + reserve)
     if margin < settings.min_margin or net_profit < settings.min_profit_chf:
         return None
     return Deal(
+        units=units,
+        grade=grade,
+        reserve=reserve,
+        discount=discount,
+        spread=(
+            f"{min(comparable_prices):.0f}–{max(comparable_prices):.0f} CHF/Stk."
+            if comparable_prices
+            else ""
+        ),
+        max_offer=max(
+            0,
+            min(
+                max_price,
+                available - extra - reserve,
+                (value * (1 - settings.sell_fee_pct) - settings.shipping_chf * units)
+                / (1 + settings.min_margin)
+                - extra
+                - reserve,
+                value * (1 - settings.sell_fee_pct)
+                - settings.shipping_chf * units
+                - extra
+                - reserve
+                - settings.min_profit_chf,
+                units * median(comparable_prices) * (1 - settings.lot_discount)
+                if units > 1
+                else max_price,
+            ),
+        ),
         listing=listing,
         product=product,
         retail_chf=retail_chf,

@@ -17,7 +17,7 @@ class SameHost(HTTPRedirectHandler):
 
 def read(url, *, data=None, headers=None, timeout=18):
     request = Request(
-        url, data=data, headers={"User-Agent": "FlipRadar/2.0", **(headers or {})}
+        url, data=data, headers={"User-Agent": "FlipRadar/2.1", **(headers or {})}
     )
     with build_opener(SameHost()).open(request, timeout=timeout) as response:
         body = response.read(8_000_001)

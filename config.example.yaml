@@ -14,7 +14,7 @@ interval_minutes: 5       # Abstand zwischen den Durchläufen
 # --- Rechnung für den Netto-Gewinn ---------------------------------------
 # Netto = Marktwert × (1 − sell_fee_pct) − shipping_chf − Kaufpreis
 sell_fee_pct: 0.10        # Verkaufsgebühr der Plattform, auf der du weiterverkaufst (anpassen)
-shipping_chf: 10          # Versand oder Fahrtkosten pro Deal
+shipping_chf: 10          # Versand oder Fahrtkosten je verkaufte Einheit
 eur_to_chf: 0.94          # Wechselkurs für Kleinanzeigen – ab und zu aktualisieren
 
 # --- Marktwert -----------------------------------------------------------
@@ -28,10 +28,6 @@ warmup_first_cycle: true  # allererster Durchlauf sammelt nur Daten
 
 # --- Technik -------------------------------------------------------------
 platforms: [ricardo, tutti, kleinanzeigen, ebay]
-# Plattformen, die nur Preise sammeln und nie einen Telegram-Alarm senden
-# (muessen auch in platforms stehen), z. B. collect_only: [kleinanzeigen]
-collect_only: []
-# Optional weitere Quelle (sammelt immer nur, kein Alarm): marktplaats
 max_results_per_search: 40
 request_delay_seconds: 3  # Pause zwischen Abfragen (nicht unter 2 setzen)
 db_path: flipradar.db
@@ -47,10 +43,13 @@ ebay:
   client_id: ""
   client_secret: ""
 
-# Optional, kostenpflichtig: Quellen ueber Apify (Dienst von Dritten), z. B. platforms: [..., subito, wallapop, leboncoin]
-# Jeder Lauf verbraucht Apify-Guthaben. Gesucht wird nur nach den hier genannten Produkten.
-apify:
-  token: ""
-  products: []           # Namen aus der watchlist.yaml, z. B. ["PS5", "RTX 4070"]
-  interval_minutes: 720  # Mindestabstand je Produkt (12 Stunden)
-  max_results: 20        # Treffer pro Lauf
+# Erweiterter Handel und Suchumfang
+portfolio_chf: 2000
+lot_budget_chf: 2000
+lot_discount: 0.30
+b_reserve_chf: 20
+batch_size: 30
+discovery: true
+disabled_models: []
+ebay_daily_calls: 4000
+kleinanzeigen_schriftliche_freigabe: false

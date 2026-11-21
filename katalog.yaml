@@ -1,0 +1,1523 @@
+products:
+- name: Makita DDF484
+  category: werkzeug
+  query: Makita DDF484
+  include:
+  - DDF484
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Makita DHP484
+  category: werkzeug
+  query: Makita DHP484
+  include:
+  - DHP484
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Makita DHR243
+  category: werkzeug
+  query: Makita DHR243
+  include:
+  - DHR243
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Makita DHR242
+  category: werkzeug
+  query: Makita DHR242
+  include:
+  - DHR242
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Makita DHS680
+  category: werkzeug
+  query: Makita DHS680
+  include:
+  - DHS680
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Makita DGA504
+  category: werkzeug
+  query: Makita DGA504
+  include:
+  - DGA504
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Makita DTD171
+  category: werkzeug
+  query: Makita DTD171
+  include:
+  - DTD171
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Makita DTD172
+  category: werkzeug
+  query: Makita DTD172
+  include:
+  - DTD172
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Makita DJV181
+  category: werkzeug
+  query: Makita DJV181
+  include:
+  - DJV181
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Makita DTM52
+  category: werkzeug
+  query: Makita DTM52
+  include:
+  - DTM52
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Bosch GSR 18V-55
+  category: werkzeug
+  query: Bosch GSR 18V-55
+  include:
+  - Bosch
+  - GSR
+  - 18V-55
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Bosch GSB 18V-55
+  category: werkzeug
+  query: Bosch GSB 18V-55
+  include:
+  - Bosch
+  - GSB
+  - 18V-55
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Bosch GBH 18V-26
+  category: werkzeug
+  query: Bosch GBH 18V-26
+  include:
+  - Bosch
+  - GBH
+  - 18V-26
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Bosch GKT 55 GCE
+  category: werkzeug
+  query: Bosch GKT 55 GCE
+  include:
+  - Bosch
+  - GKT
+  - '55'
+  - GCE
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Bosch GLL 3-80
+  category: werkzeug
+  query: Bosch GLL 3-80
+  include:
+  - Bosch
+  - GLL
+  - 3-80
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Bosch GCM 8 SJL
+  category: werkzeug
+  query: Bosch GCM 8 SJL
+  include:
+  - Bosch
+  - GCM
+  - '8'
+  - SJL
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: DeWalt DCD791
+  category: werkzeug
+  query: DeWalt DCD791
+  include:
+  - DCD791
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: DeWalt DCD796
+  category: werkzeug
+  query: DeWalt DCD796
+  include:
+  - DCD796
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: DeWalt DCF887
+  category: werkzeug
+  query: DeWalt DCF887
+  include:
+  - DCF887
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: DeWalt DWS780
+  category: werkzeug
+  query: DeWalt DWS780
+  include:
+  - DWS780
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Festool TS 55
+  category: werkzeug
+  query: Festool TS 55
+  include:
+  - Festool
+  - TS
+  - '55'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Festool ETS EC 150
+  category: werkzeug
+  query: Festool ETS EC 150
+  include:
+  - Festool
+  - ETS
+  - EC
+  - '150'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Festool DOMINO DF 500
+  category: werkzeug
+  query: Festool DOMINO DF 500
+  include:
+  - Festool
+  - DOMINO
+  - DF
+  - '500'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Festool OF 1400
+  category: werkzeug
+  query: Festool OF 1400
+  include:
+  - Festool
+  - OF
+  - '1400'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Hilti TE 30
+  category: werkzeug
+  query: Hilti TE 30
+  include:
+  - Hilti
+  - TE
+  - '30'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Hilti TE 6
+  category: werkzeug
+  query: Hilti TE 6
+  include:
+  - Hilti
+  - TE
+  - '6'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Milwaukee M18 FPD3
+  category: werkzeug
+  query: Milwaukee M18 FPD3
+  include:
+  - Milwaukee
+  - M18
+  - FPD3
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Milwaukee M18 FID3
+  category: werkzeug
+  query: Milwaukee M18 FID3
+  include:
+  - Milwaukee
+  - M18
+  - FID3
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Fluke 115
+  category: werkzeug
+  query: Fluke 115
+  include:
+  - '115'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Fluke 117
+  category: werkzeug
+  query: Fluke 117
+  include:
+  - '117'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Fluke 325
+  category: werkzeug
+  query: Fluke 325
+  include:
+  - '325'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Fluke 376
+  category: werkzeug
+  query: Fluke 376
+  include:
+  - '376'
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: Fluke 87V
+  category: werkzeug
+  query: Fluke 87V
+  include:
+  - 87V
+  exclude:
+  - koffer leer
+  - nur koffer
+  - anleitung
+  - adapter
+  - ersatzteile
+  - nachbau
+  - kohlebürsten
+  - halterung
+  min_price_chf: 35
+- name: iPhone 13 mini
+  category: handy
+  query: iPhone 13 mini
+  include:
+  - iPhone
+  - '13'
+  - mini
+  exclude: []
+  min_price_chf: 65
+- name: iPhone 13 Pro
+  category: handy
+  query: iPhone 13 Pro
+  include:
+  - iPhone
+  - '13'
+  - Pro
+  exclude:
+  - max
+  min_price_chf: 65
+- name: iPhone 13 Pro Max
+  category: handy
+  query: iPhone 13 Pro Max
+  include:
+  - iPhone
+  - '13'
+  - Pro
+  - Max
+  exclude: []
+  min_price_chf: 65
+- name: iPhone 14 Pro
+  category: handy
+  query: iPhone 14 Pro
+  include:
+  - iPhone
+  - '14'
+  - Pro
+  exclude:
+  - max
+  min_price_chf: 65
+- name: iPhone 14 Pro Max
+  category: handy
+  query: iPhone 14 Pro Max
+  include:
+  - iPhone
+  - '14'
+  - Pro
+  - Max
+  exclude: []
+  min_price_chf: 65
+- name: Galaxy S22 Ultra
+  category: handy
+  query: Galaxy S22 Ultra
+  include:
+  - Galaxy
+  - S22
+  - Ultra
+  exclude: []
+  min_price_chf: 65
+- name: Galaxy S23 Ultra
+  category: handy
+  query: Galaxy S23 Ultra
+  include:
+  - Galaxy
+  - S23
+  - Ultra
+  exclude: []
+  min_price_chf: 65
+- name: Google Pixel 8 Pro
+  category: handy
+  query: Google Pixel 8 Pro
+  include:
+  - Google
+  - Pixel
+  - '8'
+  - Pro
+  exclude: []
+  min_price_chf: 65
+- name: Google Pixel 9 Pro
+  category: handy
+  query: Google Pixel 9 Pro
+  include:
+  - Google
+  - Pixel
+  - '9'
+  - Pro
+  exclude: []
+  min_price_chf: 65
+- name: Google Pixel 7 Pro
+  category: handy
+  query: Google Pixel 7 Pro
+  include:
+  - Google
+  - Pixel
+  - '7'
+  - Pro
+  exclude: []
+  min_price_chf: 65
+- name: OnePlus 12
+  category: handy
+  query: OnePlus 12
+  include:
+  - OnePlus
+  - '12'
+  exclude: []
+  min_price_chf: 65
+- name: Xiaomi 14 Ultra
+  category: handy
+  query: Xiaomi 14 Ultra
+  include:
+  - Xiaomi
+  - '14'
+  - Ultra
+  exclude: []
+  min_price_chf: 65
+- name: Xbox Series S
+  category: konsole
+  query: Xbox Series S
+  include:
+  - Xbox
+  - Series
+  - S
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: Xbox One X
+  category: konsole
+  query: Xbox One X
+  include:
+  - Xbox
+  - One
+  - X
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: Nintendo Switch Lite
+  category: konsole
+  query: Nintendo Switch Lite
+  include:
+  - Nintendo
+  - Switch
+  - Lite
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: Nintendo 2DS XL
+  category: konsole
+  query: Nintendo 2DS XL
+  include:
+  - Nintendo
+  - 2DS
+  - XL
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: Nintendo 3DS XL
+  category: konsole
+  query: Nintendo 3DS XL
+  include:
+  - Nintendo
+  - 3DS
+  - XL
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: PlayStation 4 Pro
+  category: konsole
+  query: PlayStation 4 Pro
+  include:
+  - PlayStation
+  - '4'
+  - Pro
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: PlayStation Vita
+  category: konsole
+  query: PlayStation Vita
+  include:
+  - PlayStation
+  - Vita
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: ROG Ally X
+  category: konsole
+  query: ROG Ally X
+  include:
+  - ROG
+  - Ally
+  - X
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: Lenovo Legion Go
+  category: konsole
+  query: Lenovo Legion Go
+  include:
+  - Lenovo
+  - Legion
+  - Go
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: Game Boy Advance SP
+  category: konsole
+  query: Game Boy Advance SP
+  include:
+  - Game
+  - Boy
+  - Advance
+  - SP
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: Wii U
+  category: konsole
+  query: Wii U
+  include:
+  - Wii
+  - U
+  exclude:
+  - controller
+  - hülle
+  - spiel
+  - spiele
+  - tasche
+  - kabel
+  min_price_chf: 25
+- name: VW Polo
+  category: auto
+  query: VW Polo
+  include:
+  - VW
+  - Polo
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: VW Passat
+  category: auto
+  query: VW Passat
+  include:
+  - VW
+  - Passat
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Toyota Corolla
+  category: auto
+  query: Toyota Corolla
+  include:
+  - Toyota
+  - Corolla
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Toyota Aygo
+  category: auto
+  query: Toyota Aygo
+  include:
+  - Toyota
+  - Aygo
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Honda Jazz
+  category: auto
+  query: Honda Jazz
+  include:
+  - Honda
+  - Jazz
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Honda Civic
+  category: auto
+  query: Honda Civic
+  include:
+  - Honda
+  - Civic
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Skoda Fabia
+  category: auto
+  query: Skoda Fabia
+  include:
+  - Skoda
+  - Fabia
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Seat Ibiza
+  category: auto
+  query: Seat Ibiza
+  include:
+  - Seat
+  - Ibiza
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Seat Leon
+  category: auto
+  query: Seat Leon
+  include:
+  - Seat
+  - Leon
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Ford Fiesta
+  category: auto
+  query: Ford Fiesta
+  include:
+  - Ford
+  - Fiesta
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Ford Focus
+  category: auto
+  query: Ford Focus
+  include:
+  - Ford
+  - Focus
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Opel Corsa
+  category: auto
+  query: Opel Corsa
+  include:
+  - Opel
+  - Corsa
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Renault Clio
+  category: auto
+  query: Renault Clio
+  include:
+  - Renault
+  - Clio
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Mazda 2
+  category: auto
+  query: Mazda 2
+  include:
+  - Mazda
+  - '2'
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Mazda 3
+  category: auto
+  query: Mazda 3
+  include:
+  - Mazda
+  - '3'
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Suzuki Swift
+  category: auto
+  query: Suzuki Swift
+  include:
+  - Suzuki
+  - Swift
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Hyundai i20
+  category: auto
+  query: Hyundai i20
+  include:
+  - Hyundai
+  - i20
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Kia Picanto
+  category: auto
+  query: Kia Picanto
+  include:
+  - Kia
+  - Picanto
+  exclude:
+  - felgen
+  - motorhaube
+  - modellauto
+  - scheinwerfer
+  - reifen
+  - ersatzteile
+  - radio
+  - spiegel
+  - stoßstange
+  - schlachtfest
+  min_price_chf: 500
+- name: Sony A6400
+  category: kamera
+  query: Sony A6400
+  include:
+  - Sony
+  - A6400
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: Sony ZV-1
+  category: kamera
+  query: Sony ZV-1
+  include:
+  - Sony
+  - ZV-1
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: Sony A7 III
+  category: kamera
+  query: Sony A7 III
+  include:
+  - Sony
+  - A7
+  - III
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: Canon EOS R50
+  category: kamera
+  query: Canon EOS R50
+  include:
+  - Canon
+  - EOS
+  - R50
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: Canon EOS R10
+  category: kamera
+  query: Canon EOS R10
+  include:
+  - Canon
+  - EOS
+  - R10
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: Fujifilm X-T3
+  category: kamera
+  query: Fujifilm X-T3
+  include:
+  - Fujifilm
+  - X-T3
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: Fujifilm X-T4
+  category: kamera
+  query: Fujifilm X-T4
+  include:
+  - Fujifilm
+  - X-T4
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: Panasonic GH5
+  category: kamera
+  query: Panasonic GH5
+  include:
+  - Panasonic
+  - GH5
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: GoPro Hero 11
+  category: kamera
+  query: GoPro Hero 11
+  include:
+  - GoPro
+  - Hero
+  - '11'
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: GoPro Hero 12
+  category: kamera
+  query: GoPro Hero 12
+  include:
+  - GoPro
+  - Hero
+  - '12'
+  exclude:
+  - käfig
+  - cage
+  - tasche
+  - dummy
+  - ladegerät
+  min_price_chf: 55
+- name: Sony WH-1000XM4
+  category: audio
+  query: Sony WH-1000XM4
+  include:
+  - Sony
+  - WH-1000XM4
+  exclude:
+  - ohrpolster
+  - ladecase
+  - schutzhülle
+  min_price_chf: 25
+- name: Sony WH-1000XM5
+  category: audio
+  query: Sony WH-1000XM5
+  include:
+  - Sony
+  - WH-1000XM5
+  exclude:
+  - ohrpolster
+  - ladecase
+  - schutzhülle
+  min_price_chf: 25
+- name: Bose QC45
+  category: audio
+  query: Bose QC45
+  include:
+  - Bose
+  - QC45
+  exclude:
+  - ohrpolster
+  - ladecase
+  - schutzhülle
+  min_price_chf: 25
+- name: Sonos Beam Gen 2
+  category: audio
+  query: Sonos Beam Gen 2
+  include:
+  - Sonos
+  - Beam
+  - Gen
+  - '2'
+  exclude:
+  - ohrpolster
+  - ladecase
+  - schutzhülle
+  min_price_chf: 25
+- name: Sonos Move 2
+  category: audio
+  query: Sonos Move 2
+  include:
+  - Sonos
+  - Move
+  - '2'
+  exclude:
+  - ohrpolster
+  - ladecase
+  - schutzhülle
+  min_price_chf: 25
+- name: JBL Charge 5
+  category: audio
+  query: JBL Charge 5
+  include:
+  - JBL
+  - Charge
+  - '5'
+  exclude:
+  - ohrpolster
+  - ladecase
+  - schutzhülle
+  min_price_chf: 25
+- name: JBL Flip 6
+  category: audio
+  query: JBL Flip 6
+  include:
+  - JBL
+  - Flip
+  - '6'
+  exclude:
+  - ohrpolster
+  - ladecase
+  - schutzhülle
+  min_price_chf: 25
+- name: Dyson V10
+  category: haushalt
+  query: Dyson V10
+  include:
+  - Dyson
+  - V10
+  exclude:
+  - filter
+  - bürste
+  - schlauch
+  - ersatzteil
+  - düse
+  min_price_chf: 25
+- name: Dyson V11
+  category: haushalt
+  query: Dyson V11
+  include:
+  - Dyson
+  - V11
+  exclude:
+  - filter
+  - bürste
+  - schlauch
+  - ersatzteil
+  - düse
+  min_price_chf: 25
+- name: Dyson V15
+  category: haushalt
+  query: Dyson V15
+  include:
+  - Dyson
+  - V15
+  exclude:
+  - filter
+  - bürste
+  - schlauch
+  - ersatzteil
+  - düse
+  min_price_chf: 25
+- name: Roborock S7
+  category: haushalt
+  query: Roborock S7
+  include:
+  - Roborock
+  - S7
+  exclude:
+  - filter
+  - bürste
+  - schlauch
+  - ersatzteil
+  - düse
+  min_price_chf: 25
+- name: Roborock S8
+  category: haushalt
+  query: Roborock S8
+  include:
+  - Roborock
+  - S8
+  exclude:
+  - filter
+  - bürste
+  - schlauch
+  - ersatzteil
+  - düse
+  min_price_chf: 25
+- name: Thermomix TM5
+  category: haushalt
+  query: Thermomix TM5
+  include:
+  - Thermomix
+  - TM5
+  exclude:
+  - filter
+  - bürste
+  - schlauch
+  - ersatzteil
+  - düse
+  min_price_chf: 25
+- name: Thermomix TM6
+  category: haushalt
+  query: Thermomix TM6
+  include:
+  - Thermomix
+  - TM6
+  exclude:
+  - filter
+  - bürste
+  - schlauch
+  - ersatzteil
+  - düse
+  min_price_chf: 25
+- name: Sage Barista Express
+  category: haushalt
+  query: Sage Barista Express
+  include:
+  - Sage
+  - Barista
+  - Express
+  exclude:
+  - filter
+  - bürste
+  - schlauch
+  - ersatzteil
+  - düse
+  min_price_chf: 25
+- name: Garmin Edge 530
+  category: sport
+  query: Garmin Edge 530
+  include:
+  - Garmin
+  - Edge
+  - '530'
+  exclude:
+  - halterung
+  - armband
+  - tasche
+  min_price_chf: 25
+- name: Garmin Edge 830
+  category: sport
+  query: Garmin Edge 830
+  include:
+  - Garmin
+  - Edge
+  - '830'
+  exclude:
+  - halterung
+  - armband
+  - tasche
+  min_price_chf: 25
+- name: Garmin Edge 1040
+  category: sport
+  query: Garmin Edge 1040
+  include:
+  - Garmin
+  - Edge
+  - '1040'
+  exclude:
+  - halterung
+  - armband
+  - tasche
+  min_price_chf: 25
+- name: Garmin Fenix 7
+  category: sport
+  query: Garmin Fenix 7
+  include:
+  - Garmin
+  - Fenix
+  - '7'
+  exclude:
+  - halterung
+  - armband
+  - tasche
+  min_price_chf: 25
+- name: Wahoo Kickr Core
+  category: sport
+  query: Wahoo Kickr Core
+  include:
+  - Wahoo
+  - Kickr
+  - Core
+  exclude:
+  - halterung
+  - armband
+  - tasche
+  min_price_chf: 25
+- name: Concept2 RowErg
+  category: sport
+  query: Concept2 RowErg
+  include:
+  - Concept2
+  - RowErg
+  exclude:
+  - halterung
+  - armband
+  - tasche
+  min_price_chf: 25

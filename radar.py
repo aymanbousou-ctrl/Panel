@@ -1,4 +1,4 @@
-"""FlipRadar 2.0. Run from any working directory."""
+"""FlipRadar 2.1. Run from any working directory."""
 
 import argparse
 import logging
@@ -9,12 +9,12 @@ import time
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "vendor"))
+ROOT = Path(__file__).resolve().parent
+sys.path[:0] = [str(ROOT / "vendor"), str(ROOT)]
 from flipradar.config import load_settings, load_watchlist
 from flipradar.db import Store
 from flipradar.engine import Radar
 from flipradar.notify import Telegram
-from flipradar.platforms import PLATFORMS
 from flipradar.setup import data_dir, edit, init
 from flipradar.sources import Ebay, search
 
@@ -23,7 +23,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument(
         "mode",
-        choices=["run", "once", "settings", "diagnose", "stats", "test-telegram"],
+        choices=[
+            "run",
+            "once",
+            "bestand",
+            "settings",
+            "diagnose",
+            "stats",
+            "test-telegram",
+        ],
         default="run",
         nargs="?",
     )
@@ -36,6 +44,11 @@ def main():
     folder = data_dir()
     folder.mkdir(parents=True, exist_ok=True)
     os.chdir(folder)
+    if args.mode == "bestand" and (folder / "config.yaml").exists():
+        from flipradar.bestand import edit as edit_bestand
+
+        edit_bestand(folder, load_watchlist(folder / "watchlist.yaml"))
+        return 0
     guard = sqlite3.connect(folder / "instance.lock.sqlite", timeout=0)
     try:
         guard.execute("BEGIN EXCLUSIVE")
@@ -44,6 +57,11 @@ def main():
         return 1
     try:
         init(folder)
+        if args.mode == "bestand":
+            from flipradar.bestand import edit as edit_bestand
+
+            edit_bestand(folder, load_watchlist(folder / "watchlist.yaml"))
+            return 0
         if args.mode == "settings":
             edit(folder)
         s = load_settings(folder / "config.yaml")
@@ -60,7 +78,7 @@ def main():
             handlers=[logging.StreamHandler(sys.stdout), logger],
         )
         tg = Telegram(s.telegram_token, s.telegram_chat_id)
-        log.info("FlipRadar 2.0 | Python %s | %s", sys.version.split()[0], folder)
+        log.info("FlipRadar 2.1 | Python %s | %s", sys.version.split()[0], folder)
         log.info(
             "%d Produkte | Schwelle %.0f %% | bis %.0f CHF | Zielintervall %.1f Minuten",
             len(products),
@@ -71,7 +89,7 @@ def main():
         if args.mode == "test-telegram":
             if args.no_alerts:
                 return 0
-            return 0 if tg.send("FlipRadar 2.0 – Telegram-Test erfolgreich.") else 1
+            return 0 if tg.send("FlipRadar 2.1 – Telegram-Test erfolgreich.") else 1
         if args.mode == "stats":
             db = Store(s.db_path)
             try:
@@ -94,15 +112,6 @@ def main():
                 if name == "ebay" and not (s.ebay_client_id and s.ebay_client_secret):
                     log.warning("eBay.de: Zugangsdaten fehlen")
                     continue
-                if PLATFORMS[name].paid:
-                    if not s.apify_token:
-                        log.warning("%s: Apify-Token fehlt", name)
-                        continue
-                    log.info(
-                        "%s: kostenpflichtiger Testlauf, bis zu %d Treffer",
-                        name,
-                        s.apify_max_results,
-                    )
                 product = next(
                     (p for p in products if not p.platforms or name in p.platforms),
                     None,
@@ -122,7 +131,7 @@ def main():
             if (
                 not args.no_alerts
                 and tg.configured
-                and not tg.send("FlipRadar 2.0 – Telegram-Test erfolgreich.")
+                and not tg.send("FlipRadar 2.1 – Telegram-Test erfolgreich.")
             ):
                 failures += 1
             return int(bool(failures))
