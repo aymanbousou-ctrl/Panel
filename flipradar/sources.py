@@ -6,7 +6,7 @@ import math
 import re
 import time
 from urllib.error import HTTPError
-from urllib.parse import quote, urlencode, urljoin, urlsplit
+from urllib.parse import quote, quote_plus, urlencode, urljoin, urlsplit
 
 from bs4 import BeautifulSoup
 from .models import Listing
@@ -156,6 +156,49 @@ def kleinanzeigen(data):
     return result
 
 
+def marktplaats(data):
+    """Liest die Suchergebnisse aus __NEXT_DATA__. Nur Festpreise ('FIXED').
+
+    'MIN_BID' (Bieden vanaf) ist ein Mindestgebot und kein Kaufpreis, 'FAST_BID' hat
+    gar keinen Preis. Beides bleibt draussen, wie bei Ricardo ohne Sofortkauf.
+    """
+    script = page(data).find("script", id="__NEXT_DATA__")
+    if not script:
+        raise ValueError("Marktplaats-Suchergebnisse fehlen im HTML")
+    rows = json.loads(script.get_text())["props"]["pageProps"][
+        "searchRequestAndResponse"
+    ]["listings"]
+    if not isinstance(rows, list):
+        raise ValueError("Marktplaats-Seitenformat unbekannt")
+    result = {}
+    for row in rows:
+        info = row.get("priceInfo")
+        sku, title, path = row.get("itemId"), row.get("title"), row.get("vipUrl")
+        if not (sku and title and isinstance(info, dict) and "priceType" in info):
+            raise ValueError("Marktplaats-Inseratformat unbekannt")
+        cents = info.get("priceCents")
+        if (
+            info["priceType"] != "FIXED"
+            or row.get("reserved")
+            or not isinstance(cents, int)
+            or cents <= 0
+            or not str(path).startswith("/v/")
+        ):
+            continue
+        place = row.get("location") or {}
+        result[str(sku)] = Listing(
+            "marktplaats",
+            str(sku),
+            title,
+            urljoin("https://www.marktplaats.nl", path),
+            cents / 100,
+            "EUR",
+            location=place.get("cityName") or "",
+            description=row.get("description") or "",
+        )
+    return list(result.values())
+
+
 class Ebay:
     def __init__(self, settings):
         self.settings = settings
@@ -255,6 +298,9 @@ def search(name, p, settings, ebay):
         ):
             raise ValueError("Kleinanzeigen-URL ungueltig")
         parser = kleinanzeigen
+    elif name == "marktplaats":
+        url = "https://www.marktplaats.nl/q/" + quote_plus(p.query) + "/"
+        parser = marktplaats
     else:
         raise ValueError("Unbekannte Plattform")
     return parser(read(url)[0])[: settings.max_results_per_search]

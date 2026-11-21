@@ -11,6 +11,10 @@ class Platform:
     label: str
     country: str  # ISO-Land des Marktplatzes
     currency: str
+    # Immer nur sammeln: Kosten fuer Kauf im Ausland sind dort noch nicht eingerechnet.
+    collect_only: bool = False
+    # Begriffe fuer Gesuche, Defekte und Tausch in der Landessprache der Plattform.
+    exclude: tuple = ()
 
 
 PLATFORMS = {
@@ -18,6 +22,17 @@ PLATFORMS = {
     "tutti": Platform("Tutti", "CH", "CHF"),
     "kleinanzeigen": Platform("Kleinanzeigen", "DE", "EUR"),
     "ebay": Platform("eBay.de", "DE", "EUR"),
+    "marktplaats": Platform(
+        "Marktplaats",
+        "NL",
+        "EUR",
+        collect_only=True,
+        exclude=(
+            "gezocht", "gevraagd", "zoek", "zoeken", "defect", "kapot",
+            "niet werkend", "werkt niet", "onderdelen", "reparatie", "ruil",
+            "ruilen", "huur", "huren", "te huur", "verhuur", "lege doos",
+        ),
+    ),
 }
 
 
@@ -27,3 +42,7 @@ def label(name):
 
 def country(name):
     return PLATFORMS[name].country if name in PLATFORMS else ""
+
+
+def excluded_terms(name):
+    return PLATFORMS[name].exclude if name in PLATFORMS else ()

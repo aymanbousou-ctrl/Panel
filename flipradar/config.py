@@ -95,6 +95,9 @@ def load_settings(path: str | Path) -> Settings:
         raise ValueError(f"Unbekannte Plattform(en) in config: {sorted(unknown)}")
     if set(s.collect_only) - set(s.platforms):
         raise ValueError("collect_only nennt eine Plattform, die nicht in platforms steht")
+    s.collect_only = sorted(
+        set(s.collect_only) | {n for n in s.platforms if PLATFORMS[n].collect_only}
+    )
     if not 0 < s.min_margin < 5:
         raise ValueError("min_margin als Anteil angeben, z. B. 0.20 für 20 %")
     if not 0 <= s.germany_extra_chf < float("inf") or not 0 < s.eur_to_chf < float(

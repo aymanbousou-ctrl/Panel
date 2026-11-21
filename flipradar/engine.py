@@ -8,7 +8,8 @@ from datetime import datetime
 from email.utils import parsedate_to_datetime
 from urllib.error import HTTPError
 from .sources import Ebay, search
-from .matcher import match_product
+from .matcher import has_any, match_product
+from .platforms import excluded_terms
 from .notify import format_deal
 from .sales import load_sales
 from .retail import refresh_prices
@@ -119,6 +120,8 @@ class Radar:
                 for item in listings:
                     item.price_chf = to_chf(item, s)
                     matched = match_product(item, products)
+                    if matched and has_any(item.title, excluded_terms(name)):
+                        matched = None
                     if matched and matched.platforms and name not in matched.platforms:
                         matched = None
                     # Keep accessory and implausibly low prices out of the Swiss median.

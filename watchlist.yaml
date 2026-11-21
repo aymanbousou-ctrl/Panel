@@ -40,9 +40,9 @@ exclude_global:
 # Zusätzliche Ausschlüsse pro Kategorie (z. B. Komplett-PCs bei Grafikkarten)
 exclude_by_category:
   gpu: [ohne chip, ohne gpu, ohne grafikchip, no gpu, chip entfernt, pcb only, pc, gaming pc, komplett pc, komplettsystem, rechner, computer, system, laptop, notebook]
-  cpu: [gaming pc, komplett pc, komplettsystem, rechner, computer, laptop, notebook]
-  ram: [gaming pc, komplett pc, rechner, computer, laptop, notebook, sodimm, so dimm]
-  ssd: [gaming pc, komplett pc, rechner, computer, laptop, notebook]
+  cpu: [game pc, desktop, tower, gaming pc, komplett pc, komplettsystem, rechner, computer, laptop, notebook]
+  ram: [game pc, desktop, tower, gaming pc, komplett pc, rechner, computer, laptop, notebook, sodimm, so dimm]
+  ssd: [game pc, desktop, tower, gaming pc, komplett pc, rechner, computer, laptop, notebook]
   handy: [hülle, case, cover, panzerglas, schutzglas, displayschutz, schutzfolie]
 
 products:

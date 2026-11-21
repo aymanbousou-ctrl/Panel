@@ -25,7 +25,10 @@ Ein neuer Fund oder ein Preisrückgang von mehr als 3 % gegenüber der letzten B
 | Tutti.ch | V2 lädt die öffentliche deutschsprachige Suchseite und liest die darin bereits ausgelieferten Inserate. Die GraphQL-URL aus V1 wird nicht angefragt. |
 | Ricardo.ch | V2 liest die öffentliche Suchergebnisseite. Nur Angebote mit erkennbarem Sofortkaufpreis werden übernommen. Bei einem Angebot mit Gebot und Sofortkauf zählt der Sofortkaufpreis. Es wird kein separater Browser installiert. |
 | Kleinanzeigen.de | V2 liest Titel, Link und Angebotspreis aus den sichtbaren Trefferkarten. „VB“ ohne Betrag liefert keinen bewertbaren Kaufpreis. |
+| Marktplaats.nl (NL) | V2 liest die öffentliche Suchseite (erste Ergebnisseite, nach Relevanz sortiert). Nur Festpreise zählen. „Bieden vanaf“ und reine Gebote werden übersprungen. Läuft immer im Modus „nur sammeln“: Preise werden gespeichert, aber es gibt keinen Telegram-Alarm. |
 | eBay.de | V2 verwendet die offizielle Browse API für Festpreisangebote mit Artikelstandort Deutschland und Preis in EUR. Erforderlich sind eigene für die Produktion berechtigte Schlüssel. Ohne sie meldet V2 den fehlenden Zugang und durchsucht die anderen aktiven Quellen. |
+
+**Marktplaats einschalten.** Öffne `%LOCALAPPDATA%\FlipRadarV2\config.yaml` mit dem Editor und füge unter `platforms:` die Zeile `- marktplaats` hinzu (oder schreibe `marktplaats` in die eckige Klammer). Beim nächsten Start sucht V2 dort mit. Die Quelle sammelt nur. Gesuche und Defekte filtert V2 mit niederländischen Begriffen wie „gezocht“ und „defect“ heraus.
 
 **eBay einschalten.** Besorge im eBay Developers Program Produktionsberechtigung für die Buy APIs. Unter **Application Keys → Production** findest du App ID (Client ID) und Cert ID (Client Secret). Trage beide beim Start mit **E** ein. Ein normales Käuferkonto, Sandbox-Schlüssel oder ein eBay-Passwort genügen für diese Schnittstelle nicht. Mit **D** prüfst du danach die Verbindung. Beachte das Kontingent deines eBay-Schlüssels. Falls du keinen API-Zugang hast, bietet eBay für gespeicherte Suchen eigene E-Mail-Meldungen an. Diese laufen separat von FlipRadar und dessen Margenfilter.
 

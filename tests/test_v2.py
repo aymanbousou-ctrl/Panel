@@ -17,7 +17,7 @@ from flipradar.db import Store
 from flipradar.engine import Radar, delay_on_error
 from flipradar.models import Listing, Product
 from flipradar.pricing import evaluate
-from flipradar.sources import tutti, ricardo, kleinanzeigen, Ebay
+from flipradar.sources import tutti, ricardo, kleinanzeigen, marktplaats, Ebay
 from flipradar.setup import init
 from flipradar.retail import retail_price
 from flipradar.sales import load_sales
@@ -269,6 +269,62 @@ class Checks(unittest.TestCase):
             item.platform, item.price_chf = platform, 350
             deal = evaluate(item, self.p, [], self.s)
             self.assertEqual(deal.germany_extra_chf, extra)
+
+    def test_marktplaats_page(self):
+        def row(sku, kind, cents, **extra):
+            return {
+                "itemId": sku,
+                "title": "RTX 4070 " + sku,
+                "description": "Videokaart",
+                "priceInfo": {"priceCents": cents, "priceType": kind},
+                "location": {"cityName": "Utrecht"},
+                "vipUrl": "/v/computers-en-software/videokaarten/" + sku + "-x",
+                **extra,
+            }
+
+        rows = [
+            row("m1", "FIXED", 77995),
+            row("m2", "MIN_BID", 60000),
+            row("m3", "FAST_BID", 0),
+            row("m4", "FIXED", 50000, reserved=True),
+            row("m5", "FIXED", 50000, vipUrl="https://boese.example/v/x"),
+            row("m1", "FIXED", 77995),
+        ]
+
+        def html(listings):
+            data = {"props": {"pageProps": {"searchRequestAndResponse": {"listings": listings}}}}
+            return (
+                '<script id="__NEXT_DATA__" type="application/json">'
+                + json.dumps(data)
+                + "</script>"
+            ).encode()
+
+        items = marktplaats(html(rows))
+        self.assertEqual(len(items), 1)
+        x = items[0]
+        self.assertEqual((x.listing_id, x.price, x.currency, x.location), ("m1", 779.95, "EUR", "Utrecht"))
+        self.assertEqual(x.url.split("/v/")[0], "https://www.marktplaats.nl")
+        self.assertEqual(marktplaats(html([])), [])
+        with self.assertRaises(ValueError):
+            marktplaats(b"<html>Forbidden</html>")
+        with self.assertRaises(ValueError):
+            marktplaats(html([{"itemId": "m9", "title": "x"}]))
+        with self.assertRaises(KeyError):
+            marktplaats(b'<script id="__NEXT_DATA__">{"props":{"pageProps":{}}}</script>')
+
+    def test_marktplaats_is_forced_collect_only_and_filters_dutch_wants(self):
+        cfg = self.path / "config.yaml"
+        cfg.write_text("platforms: [tutti, marktplaats]\n")
+        self.assertEqual(load_settings(cfg).collect_only, ["marktplaats"])
+        self.s.platforms = ["marktplaats"]
+        self.s.collect_only = ["marktplaats"]
+        wanted = Listing("marktplaats", "m7", "GEZOCHT: RTX 4070", "https://www.marktplaats.nl/v/x", 100, "EUR")
+        offer = Listing("marktplaats", "m8", "RTX 4070 videokaart", "https://www.marktplaats.nl/v/y", 400, "EUR")
+        with patch("flipradar.engine.search", return_value=[wanted, offer]):
+            Radar(self.s, self.db, self.t).cycle([self.p])
+        rows = dict(self.db.conn.execute("select listing_id, product from listings"))
+        self.assertEqual(rows, {"m7": None, "m8": "RTX 4070"})
+        self.t.send.assert_not_called()
 
 
 if __name__ == "__main__":
