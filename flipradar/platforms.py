@@ -19,6 +19,20 @@ class Platform:
     paid: bool = False
 
 
+ES_WORDS = (
+    "busco", "se busca", "compro", "roto", "averiado", "no funciona",
+    "para piezas", "despiece", "cambio", "intercambio", "caja vacia", "alquiler",
+)
+FR_WORDS = (
+    "recherche", "cherche", "achete", "hs", "en panne", "pour pieces",
+    "echange", "boite vide", "location", "louer",
+)
+IT_WORDS = (
+    "cercasi", "cerco", "difettoso", "guasto", "rotto", "non funzionante",
+    "ricambi", "per ricambi", "scambio", "permuta", "scatola vuota",
+    "affitto", "noleggio",
+)
+
 PLATFORMS = {
     "ricardo": Platform("Ricardo", "CH", "CHF"),
     "tutti": Platform("Tutti", "CH", "CHF"),
@@ -30,11 +44,7 @@ PLATFORMS = {
         "EUR",
         collect_only=True,
         paid=True,
-        exclude=(
-            "cercasi", "cerco", "difettoso", "guasto", "rotto", "non funzionante",
-            "ricambi", "per ricambi", "scambio", "permuta", "scatola vuota",
-            "affitto", "noleggio",
-        ),
+        exclude=IT_WORDS,
     ),
     "wallapop": Platform(
         "Wallapop",
@@ -42,11 +52,7 @@ PLATFORMS = {
         "EUR",
         collect_only=True,
         paid=True,
-        exclude=(
-            "busco", "se busca", "compro", "roto", "averiado", "no funciona",
-            "para piezas", "despiece", "cambio", "intercambio", "caja vacia",
-            "alquiler",
-        ),
+        exclude=ES_WORDS,
     ),
     "leboncoin": Platform(
         "Leboncoin",
@@ -54,11 +60,13 @@ PLATFORMS = {
         "EUR",
         collect_only=True,
         paid=True,
-        exclude=(
-            "recherche", "cherche", "achete", "hs", "en panne", "pour pieces",
-            "echange", "boite vide", "location", "louer",
-        ),
+        exclude=FR_WORDS,
     ),
+    # eBay ueber Apify (Dienst von Dritten). Wie die offizielle Schnittstelle: nur .de darf Alarme senden.
+    "ebay_de": Platform("eBay.de (Apify)", "DE", "EUR", paid=True),
+    "ebay_fr": Platform("eBay.fr", "FR", "EUR", collect_only=True, paid=True, exclude=FR_WORDS),
+    "ebay_it": Platform("eBay.it", "IT", "EUR", collect_only=True, paid=True, exclude=IT_WORDS),
+    "ebay_es": Platform("eBay.es", "ES", "EUR", collect_only=True, paid=True, exclude=ES_WORDS),
     "vinted": Platform("Vinted.de", "DE", "EUR", collect_only=True),
     "marktplaats": Platform(
         "Marktplaats",

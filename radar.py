@@ -1,4 +1,4 @@
-"""FlipRadar 2.2. Run from any working directory."""
+"""FlipRadar 2.3. Run from any working directory."""
 
 import argparse
 import logging
@@ -79,7 +79,7 @@ def main():
             handlers=[logging.StreamHandler(sys.stdout), logger],
         )
         tg = Telegram(s.telegram_token, s.telegram_chat_id)
-        log.info("FlipRadar 2.2 | Python %s | %s", sys.version.split()[0], folder)
+        log.info("FlipRadar 2.3 | Python %s | %s", sys.version.split()[0], folder)
         log.info(
             "%d Produkte | Schwelle %.0f %% | bis %.0f CHF | Zielintervall %.1f Minuten",
             len(products),

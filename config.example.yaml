@@ -58,7 +58,7 @@ kleinanzeigen_schriftliche_freigabe: false
 # (Namen unter platforms eintragen). collect_only kann zusaetzlich weitere Plattformen auf "nur sammeln" setzen.
 collect_only: []
 
-# Optional, kostenpflichtig: subito, wallapop und leboncoin laufen ueber Apify (Dienst von Dritten).
+# Optional, kostenpflichtig: subito, wallapop, leboncoin und ebay_de/ebay_fr/ebay_it/ebay_es laufen ueber Apify (Dienst von Dritten).
 # Jeder Lauf verbraucht Apify-Guthaben. Gesucht wird nur nach den hier genannten Produkten.
 apify:
   token: ""

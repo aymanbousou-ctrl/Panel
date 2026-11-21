@@ -16,6 +16,7 @@ from flipradar.engine import Radar
 from flipradar.models import Listing, Product
 from flipradar.pricing import evaluate
 from flipradar.sources import (
+    ebay_listings,
     leboncoin_listings,
     marktplaats,
     subito_listings,
@@ -354,6 +355,71 @@ class Quellen(unittest.TestCase):
         cfg = self.path / "config.yaml"
         cfg.write_text("platforms: [wallapop, leboncoin, subito]\n")
         self.assertEqual(load_settings(cfg).collect_only, ["leboncoin", "subito", "wallapop"])
+
+    def test_ebay_via_apify_rows_input_and_alert_rules(self):
+        from flipradar.sources import search
+
+        row = {
+            "type": "product",
+            "itemId": "377663514968",
+            "title": "Sony PlayStation 5 Slim PS5 1TB Disc Edition 2 DualSense Controller Bundle",
+            "price": 800,
+            "currency": "EUR",
+            "shippingCost": "+EUR 10,49 Lieferung",
+            "condition": "Neu (Sonstige)",
+            "listingType": "Buy It Now",
+            "url": "https://www.ebay.de/itm/377663514968",
+            "bidCount": None,
+        }
+        rows = [
+            row,
+            dict(row),
+            dict(row, itemId="2", shippingCost="Kostenlose Lieferung", url="https://www.ebay.de/itm/2"),
+            dict(row, itemId="3", shippingCost=None, url="https://www.ebay.de/itm/3", condition="Generalüberholt"),
+            dict(row, itemId="4", listingType="Auction", url="https://www.ebay.de/itm/4"),
+            dict(row, itemId="5", bidCount=3, url="https://www.ebay.de/itm/5"),
+            dict(row, itemId="6", condition="Zur Teileverwertung", url="https://www.ebay.de/itm/6"),
+            dict(row, itemId="7", url="https://www.ebay.fr/itm/7"),
+            dict(row, itemId="8", currency="GBP", url="https://www.ebay.de/itm/8"),
+            dict(row, itemId="9", url="https://boese.example/itm/9"),
+        ]
+        items = ebay_listings(rows, "ebay_de")
+        self.assertEqual(
+            [(i.listing_id, i.price, i.platform, i.description) for i in items],
+            [("377663514968", 810.49, "ebay_de", ""), ("2", 800.0, "ebay_de", ""), ("3", 800.0, "ebay_de", "refurbished")],
+        )
+        self.assertEqual(items[0].url, "https://www.ebay.de/itm/377663514968")
+        self.assertEqual(ebay_listings([], "ebay_fr"), [])
+        with self.assertRaises(ValueError):
+            ebay_listings([{"foo": 1}], "ebay_de")
+        with self.assertRaises(ValueError):
+            ebay_listings({"x": 1}, "ebay_de")
+
+        p = Product("PS5", "konsole", "ps5 konsole", ["ps5"], [], queries={"ebay_fr": "ps5"})
+        self.s.apify_token, self.s.apify_max_results = "t", 7
+        self.s.max_price_chf, self.s.eur_to_chf = 2000, 0.94
+        with patch("flipradar.sources.run_actor", return_value=[]) as call:
+            search("ebay_fr", p, self.s, None)
+            search("ebay_de", p, self.s, None)
+        fr, de = call.call_args_list
+        self.assertEqual(fr.args[0], "automation-lab/ebay-scraper")
+        self.assertEqual((fr.args[1]["searchQueries"], fr.args[1]["marketplace"]), (["ps5"], "FR"))
+        self.assertEqual(de.args[1]["searchQueries"], ["ps5 konsole"])
+        self.assertEqual((de.args[1]["listingType"], de.args[1]["maxPrice"], de.args[1]["maxProductsPerSearch"]), ("buy_it_now", 2128, 7))
+        cfg = self.path / "config.yaml"
+        cfg.write_text("platforms: [ebay_de, ebay_fr, ebay_it, ebay_es]\n")
+        self.assertEqual(load_settings(cfg).collect_only, ["ebay_es", "ebay_fr", "ebay_it"])
+
+    def test_ebay_de_via_apify_can_alert_with_german_costs(self):
+        self.s.platforms = ["ebay_de"]
+        self.s.apify_token, self.s.apify_products = "t", ["RTX 4070"]
+        self.s.germany_extra_chf = 25
+        item = Listing("ebay_de", "1", "RTX 4070", "https://www.ebay.de/itm/1", 350, "EUR")
+        with patch("flipradar.engine.search", return_value=[item]):
+            Radar(self.s, self.db, self.t).cycle([self.p])
+        self.assertEqual(self.t.send.call_count, 1)
+        self.assertIn("eBay.de (Apify)", self.t.send.call_args.args[0])
+        self.assertIn("Zusatzkosten DE", self.t.send.call_args.args[0])
 
 
 if __name__ == "__main__":

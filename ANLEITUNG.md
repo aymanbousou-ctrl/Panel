@@ -1,4 +1,4 @@
-# FlipRadar 2.2 für Windows und Python 3.15
+# FlipRadar 2.3 für Windows und Python 3.15
 
 ## Start und Umstieg
 
@@ -66,6 +66,7 @@ Zusätzlich zu Tutti, Ricardo und eBay gibt es **Marktplaats** (NL), **Vinted.de
 
 - **Marktplaats und Vinted** lesen die öffentliche Suchseite, ohne Kosten. Bei Marktplaats zählen Festpreise und „Bieden vanaf“ (als verhandelbar). Bei Vinted gilt der Preis inklusive Käuferschutz, ohne Versand.
 - **Subito, Wallapop und Leboncoin** laufen über den Dienst **Apify** (Dritter, kostenpflichtig, auf eigene Verantwortung). Den Token trägst du mit **EINSTELLUNGEN.cmd** ein. Im Block `apify:` der `config.yaml` stehen `products` (nur diese Produkte werden gesucht, Namen wie in der Watchlist), `interval_minutes` (Mindestabstand je Produkt, Standard 720) und `max_results` (Treffer pro Lauf, Standard 20). Preise laut Apify: Subito etwa 0,001 $, Wallapop etwa 0,00025 $ und Leboncoin etwa 0,0015 $ pro Treffer, dazu eine Startgebühr je Lauf. Ein Fehlschlag wird nicht vor Ablauf des Abstands wiederholt.
+- **eBay über Apify** (ohne eBay-Schlüssel): `ebay_de`, `ebay_fr`, `ebay_it` und `ebay_es` (Scraper `automation-lab/ebay-scraper`, ca. 0,00345 $ pro Treffer plus 0,001 $ pro Lauf). Es werden nur Festpreis-Angebote im jeweiligen Land gelesen, neueste zuerst. Als Preis gilt Artikelpreis plus ausgewiesener Versand. **Nur `ebay_de` darf Telegram-Alarme senden**, die anderen drei sammeln nur. Nutze `ebay_de` nicht zusammen mit der eBay-Schnittstelle (`ebay`), sonst können Treffer doppelt gemeldet werden.
 - Die Suchbegriffe müssen zur Sprache passen. Mit `queries:` in der Watchlist legst du für eine Plattform einen eigenen Begriff fest, zum Beispiel `ps5` statt `ps5 konsole`.
 - Gesuche und Defekte filtert FlipRadar mit Begriffen der jeweiligen Sprache heraus.
 - **Kleinanzeigen** bleibt wie beschrieben ausgeschaltet, solange keine schriftliche Freigabe eingetragen ist.

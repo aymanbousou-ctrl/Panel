@@ -138,7 +138,7 @@ def edit(folder):
     cfgpath = folder / "config.yaml"
     cfg = yaml.safe_load(cfgpath.read_text(encoding="utf-8"))
     root = tk.Tk()
-    root.title("FlipRadar 2.2 – Einstellungen")
+    root.title("FlipRadar 2.3 – Einstellungen")
     fields = [
         ("Telegram Bot-Token", "telegram", "token", True),
         ("Telegram Chat-ID", "telegram", "chat_id", False),

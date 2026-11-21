@@ -60,6 +60,10 @@ class Radar:
             log.warning(
                 "eBay.de inaktiv: Produktionsschluessel fehlen. Beim Start E fuer Einstellungen waehlen."
             )
+        if "ebay" in self.platforms and "ebay_de" in self.platforms:
+            log.warning(
+                "ebay (Schnittstelle) und ebay_de (Apify) suchen beide auf eBay.de. Treffer können doppelt gemeldet werden."
+            )
         log.info(
             "Telegram-Alarme von: %s | nur sammeln: %s",
             ", ".join(p for p in self.platforms if p not in self.collect_only) or "keiner Quelle",

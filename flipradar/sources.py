@@ -442,7 +442,97 @@ def leboncoin(p, settings):
     return leboncoin_listings(rows)[: settings.apify_max_results]
 
 
-APIFY_SOURCES = {"subito": subito, "wallapop": wallapop, "leboncoin": leboncoin}
+EBAY_ACTOR = "automation-lab/ebay-scraper"
+EBAY_SITES = {
+    "ebay_de": ("DE", "www.ebay.de"),
+    "ebay_fr": ("FR", "www.ebay.fr"),
+    "ebay_it": ("IT", "www.ebay.it"),
+    "ebay_es": ("ES", "www.ebay.es"),
+}
+_WORDS_PARTS = ("teile", "parts", "defekt", "ricambi", "piezas", "pièces", "pieces")
+_WORDS_REFURB = (
+    "generalüberholt", "refurbished", "reconditionné", "ricondizionato", "reacondicionado",
+)
+_WORDS_FREE = ("kostenlos", "gratis", "free", "gratuit", "gratuita", "gratuito")
+
+
+def ebay_listings(rows, name):
+    """Wandelt die Ergebnisse des eBay-Scrapers in Inserate um.
+
+    Der Preis ist der Artikelpreis plus ausgewiesener Versand, also was du zahlst.
+    """
+    if not isinstance(rows, list):
+        raise ValueError("eBay-Antwort ist keine Liste")
+    host = EBAY_SITES[name][1]
+    result = {}
+    for row in rows:
+        if not isinstance(row, dict) or not {"itemId", "title", "url"} <= row.keys():
+            raise ValueError("eBay-Inseratformat unbekannt")
+        parts = urlsplit(str(row["url"]))
+        price = _number(row.get("price"))
+        condition = str(row.get("condition") or "").lower()
+        listing_type = str(row.get("listingType") or "").lower()
+        if (
+            row.get("type", "product") != "product"
+            or parts.scheme != "https"
+            or parts.hostname != host
+            or not parts.path.startswith("/itm/")
+            or not row["title"]
+            or price is None
+            or row.get("currency") != "EUR"
+            or "auction" in listing_type
+            or (row.get("bidCount") or 0) > 0
+            or any(word in condition for word in _WORDS_PARTS)
+        ):
+            continue
+        shipping_text = str(row.get("shippingCost") or "")
+        shipping = parse_price(shipping_text, "EUR")[0] if shipping_text else None
+        if shipping is None and any(w in shipping_text.lower() for w in _WORDS_FREE):
+            shipping = 0.0
+        sku = str(row["itemId"])
+        result[sku] = Listing(
+            name,
+            sku,
+            row["title"],
+            f"https://{host}{parts.path}",
+            round(price + (shipping or 0), 2),
+            "EUR",
+            description="refurbished" if any(w in condition for w in _WORDS_REFURB) else "",
+        )
+    return list(result.values())
+
+
+def _ebay_source(name):
+    code = EBAY_SITES[name][0]
+
+    def run(p, settings):
+        return ebay_listings(
+            run_actor(
+                EBAY_ACTOR,
+                {
+                    "searchQueries": [p.query_for(name)],
+                    "marketplace": code,
+                    "maxProductsPerSearch": settings.apify_max_results,
+                    "maxSearchPages": 1,
+                    "sort": "newly_listed",
+                    "listingType": "buy_it_now",
+                    "homeCountryOnly": True,
+                    "maxPrice": _cap_eur(p, settings),
+                },
+                settings.apify_token,
+            ),
+            name,
+        )
+
+    return run
+
+
+APIFY_SOURCES = {
+    "subito": subito,
+    "wallapop": wallapop,
+    "leboncoin": leboncoin,
+    **{name: _ebay_source(name) for name in EBAY_SITES},
+}
 
 
 class Ebay:
