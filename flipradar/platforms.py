@@ -36,6 +36,29 @@ PLATFORMS = {
             "affitto", "noleggio",
         ),
     ),
+    "wallapop": Platform(
+        "Wallapop",
+        "ES",
+        "EUR",
+        collect_only=True,
+        paid=True,
+        exclude=(
+            "busco", "se busca", "compro", "roto", "averiado", "no funciona",
+            "para piezas", "despiece", "cambio", "intercambio", "caja vacia",
+            "alquiler",
+        ),
+    ),
+    "leboncoin": Platform(
+        "Leboncoin",
+        "FR",
+        "EUR",
+        collect_only=True,
+        paid=True,
+        exclude=(
+            "recherche", "cherche", "achete", "hs", "en panne", "pour pieces",
+            "echange", "boite vide", "location", "louer",
+        ),
+    ),
     "vinted": Platform("Vinted.de", "DE", "EUR", collect_only=True),
     "marktplaats": Platform(
         "Marktplaats",

@@ -148,7 +148,7 @@ products:
   - name: PS5
     category: konsole
     query: ps5 konsole
-    queries: {subito: ps5, marktplaats: ps5}   # "konsole" ist deutsch und findet dort nichts
+    queries: {subito: ps5, marktplaats: ps5, wallapop: ps5, leboncoin: ps5}   # "konsole" ist deutsch und findet dort nichts
     include: ["ps5|playstation 5"]
     exclude: [pro, controller, dualsense, spiel, spiele, game, games, headset, ladestation, portal, kamera, lenkrad, cover, faceplate, skin, ps4, vr2]
     min_price_chf: 200

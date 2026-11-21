@@ -17,7 +17,7 @@ from flipradar.db import Store
 from flipradar.engine import Radar, delay_on_error
 from flipradar.models import Listing, Product
 from flipradar.pricing import evaluate
-from flipradar.sources import tutti, ricardo, kleinanzeigen, marktplaats, vinted, subito_listings, Ebay
+from flipradar.sources import tutti, ricardo, kleinanzeigen, marktplaats, vinted, subito_listings, wallapop_listings, leboncoin_listings, Ebay
 from flipradar.setup import init
 from flipradar.apify import run_actor
 from flipradar.retail import retail_price
@@ -462,6 +462,83 @@ class Checks(unittest.TestCase):
             [x for x in load_watchlist(ROOT / "watchlist.yaml") if x.name == "PS5"][0].query_for("marktplaats"),
             "ps5",
         )
+
+    def test_wallapop_and_leboncoin_rows(self):
+        wp = {
+            "listingId": "d4b5",
+            "itemId": "nzxe1prppp62",
+            "title": "Sony PlayStation 5 (PS5) Fortnite 1TB",
+            "price": 350,
+            "currency": "EUR",
+            "url": "https://es.wallapop.com/item/sony-playstation-5-ps5-fortnite-1tb-1326545630",
+            "city": "Madrid",
+            "reserved": False,
+        }
+        rows = [
+            wp,
+            dict(wp),
+            dict(wp, itemId="x2", reserved=True),
+            dict(wp, itemId="x3", price=None),
+            dict(wp, itemId="x4", currency="GBP"),
+            dict(wp, itemId="x5", url="https://boese.example/item/a"),
+        ]
+        items = wallapop_listings(rows)
+        self.assertEqual(len(items), 1)
+        x = items[0]
+        self.assertEqual((x.listing_id, x.price, x.currency, x.location), ("nzxe1prppp62", 350.0, "EUR", "Madrid"))
+        self.assertEqual(wallapop_listings([]), [])
+        with self.assertRaises(ValueError):
+            wallapop_listings([{"foo": 1}])
+        with self.assertRaises(ValueError):
+            wallapop_listings({"x": 1})
+
+        lb = {
+            "list_id": 3313947781,
+            "subject": "Ps5,ps4.les indestructibles",
+            "body": "Jeux",
+            "status": "active",
+            "ad_type": "offer",
+            "price": [5],
+            "price_cents": 500,
+            "price_euros": 5,
+            "url": "https://www.leboncoin.fr/ad/jeux_video/3313947781",
+            "location": {"city": "Lyon", "city_label": "Lyon 69003"},
+        }
+        rows = [
+            lb,
+            dict(lb, list_id=2, ad_type="demand"),
+            dict(lb, list_id=3, status="expired"),
+            dict(lb, list_id=4, price_euros=None, price_cents=1250),
+            dict(lb, list_id=5, price_euros=None, price_cents=None),
+            dict(lb, list_id=6, url="https://boese.example/ad/x/6"),
+        ]
+        items = leboncoin_listings(rows)
+        self.assertEqual([(i.listing_id, i.price) for i in items], [("3313947781", 5.0), ("4", 12.5)])
+        self.assertEqual(items[0].location, "Lyon 69003")
+        self.assertEqual(items[0].url, "https://www.leboncoin.fr/ad/jeux_video/3313947781")
+        with self.assertRaises(ValueError):
+            leboncoin_listings([{"subject": "x"}])
+
+    def test_wallapop_and_leboncoin_actor_input(self):
+        from flipradar.sources import search
+
+        p = Product("PS5", "konsole", "ps5 konsole", ["ps5"], [], queries={"wallapop": "ps5", "leboncoin": "ps5"})
+        self.s.apify_token, self.s.apify_max_results = "t", 5
+        self.s.max_price_chf, self.s.eur_to_chf = 2000, 0.94
+        with patch("flipradar.sources.run_actor", return_value=[]) as call:
+            search("wallapop", p, self.s, None)
+            search("leboncoin", p, self.s, None)
+        wp, lb = call.call_args_list
+        self.assertEqual(wp.args[0], "blackfalcondata/wallapop-scraper")
+        self.assertEqual(wp.args[1]["query"], ["ps5"])
+        self.assertEqual((wp.args[1]["sortBy"], wp.args[1]["maxPrice"], wp.args[1]["maxResults"]), ("newest", 2128, 5))
+        self.assertEqual(lb.args[0], "clearpath/leboncoin-api")
+        self.assertEqual(lb.args[1]["searchQuery"], "ps5")
+        self.assertEqual((lb.args[1]["sortBy"], lb.args[1]["adLimit"]), ("time", 10))
+        self.assertFalse(lb.args[1]["includeSeller"] or lb.args[1]["includePhone"])
+        cfg = self.path / "config.yaml"
+        cfg.write_text("platforms: [wallapop, leboncoin, subito]\n")
+        self.assertEqual(load_settings(cfg).collect_only, ["leboncoin", "subito", "wallapop"])
 
 
 if __name__ == "__main__":

@@ -295,6 +295,14 @@ def subito_listings(rows):
     return list(result.values())
 
 
+def _cap_eur(p, settings):
+    """Hoechstpreis in EUR aus dem CHF-Budget (spart Treffer und damit Kosten)."""
+    return math.ceil(
+        min(settings.max_price_chf, p.max_price_chf or settings.max_price_chf)
+        / settings.eur_to_chf
+    )
+
+
 def subito(p, settings):
     return subito_listings(
         run_actor(
@@ -308,14 +316,131 @@ def subito(p, settings):
                 "shippableOnly": False,
                 "searchKeywords": [p.query_for("subito")],
                 "sortOrder": "datedesc",
-                "maxPrice": math.ceil(
-                    min(settings.max_price_chf, p.max_price_chf or settings.max_price_chf)
-                    / settings.eur_to_chf
-                ),
+                "maxPrice": _cap_eur(p, settings),
             },
             settings.apify_token,
         )
     )
+
+
+WALLAPOP_ACTOR = "blackfalcondata/wallapop-scraper"
+LEBONCOIN_ACTOR = "clearpath/leboncoin-api"
+
+
+def _number(value):
+    ok = isinstance(value, (int, float)) and not isinstance(value, bool)
+    return float(value) if ok and math.isfinite(value) and value > 0 else None
+
+
+def wallapop_listings(rows):
+    """Wandelt die Ergebnisse des Wallapop-Scrapers in Inserate um."""
+    if not isinstance(rows, list):
+        raise ValueError("Wallapop-Antwort ist keine Liste")
+    result = {}
+    for row in rows:
+        if not isinstance(row, dict) or not {"title", "url"} <= row.keys():
+            raise ValueError("Wallapop-Inseratformat unbekannt")
+        parts = urlsplit(str(row["url"]))
+        sku = row.get("itemId") or row.get("listingId")
+        price = _number(row.get("price"))
+        if (
+            parts.scheme != "https"
+            or parts.hostname != "es.wallapop.com"
+            or not parts.path.startswith("/item/")
+            or not sku
+            or not row["title"]
+            or price is None
+            or row.get("currency") != "EUR"
+            or row.get("reserved")
+        ):
+            continue
+        result[str(sku)] = Listing(
+            "wallapop",
+            str(sku),
+            row["title"],
+            f"https://es.wallapop.com{parts.path}",
+            price,
+            "EUR",
+            location=row.get("city") or "",
+            description=row.get("description") or "",
+        )
+    return list(result.values())
+
+
+def wallapop(p, settings):
+    return wallapop_listings(
+        run_actor(
+            WALLAPOP_ACTOR,
+            {
+                "query": [p.query_for("wallapop")],
+                "country": "ES",
+                "sortBy": "newest",
+                "maxPrice": _cap_eur(p, settings),
+                "maxResults": settings.apify_max_results,
+                "includeDetails": False,
+                "includeSellerProfile": False,
+            },
+            settings.apify_token,
+        )
+    )
+
+
+def leboncoin_listings(rows):
+    """Wandelt die Ergebnisse des Leboncoin-Scrapers in Inserate um."""
+    if not isinstance(rows, list):
+        raise ValueError("Leboncoin-Antwort ist keine Liste")
+    result = {}
+    for row in rows:
+        if not isinstance(row, dict) or not {"list_id", "subject", "url"} <= row.keys():
+            raise ValueError("Leboncoin-Inseratformat unbekannt")
+        parts = urlsplit(str(row["url"]))
+        price = _number(row.get("price_euros"))
+        if price is None and _number(row.get("price_cents")):
+            price = row["price_cents"] / 100
+        place = row.get("location")
+        place = place if isinstance(place, dict) else {}
+        if (
+            parts.scheme != "https"
+            or parts.hostname != "www.leboncoin.fr"
+            or not parts.path.startswith("/ad/")
+            or not row["subject"]
+            or price is None
+            or row.get("ad_type", "offer") != "offer"
+            or row.get("status", "active") != "active"
+        ):
+            continue
+        sku = str(row["list_id"])
+        result[sku] = Listing(
+            "leboncoin",
+            sku,
+            row["subject"],
+            f"https://www.leboncoin.fr{parts.path}",
+            price,
+            "EUR",
+            location=place.get("city_label") or place.get("city") or "",
+            description=row.get("body") or "",
+        )
+    return list(result.values())
+
+
+def leboncoin(p, settings):
+    rows = run_actor(
+        LEBONCOIN_ACTOR,
+        {
+            "searchQuery": p.query_for("leboncoin"),
+            # Der Scraper verlangt mindestens 10; ueberzaehlige Treffer verwerfen wir.
+            "adLimit": max(10, settings.apify_max_results),
+            "price_max_filter": _cap_eur(p, settings),
+            "sortBy": "time",
+            "includeSeller": False,
+            "includePhone": False,
+        },
+        settings.apify_token,
+    )
+    return leboncoin_listings(rows)[: settings.apify_max_results]
+
+
+APIFY_SOURCES = {"subito": subito, "wallapop": wallapop, "leboncoin": leboncoin}
 
 
 class Ebay:
@@ -395,8 +520,8 @@ class Ebay:
 def search(name, p, settings, ebay):
     if name == "ebay":
         return ebay.search(p)
-    if name == "subito":
-        return subito(p, settings)[: settings.max_results_per_search]
+    if name in APIFY_SOURCES:
+        return APIFY_SOURCES[name](p, settings)[: settings.max_results_per_search]
     if name == "tutti":
         url = "https://www.tutti.ch/de/q?" + urlencode({"query": p.query_for("tutti")})
         parser = tutti
